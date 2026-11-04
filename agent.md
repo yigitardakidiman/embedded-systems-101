@@ -49,4 +49,24 @@ Bu doküman, kullanıcıya elektrik-elektronik ve gömülü sistemler temellerin
     - Her ana bölüm/konu tamamlandığında; konu anlatımı, soru-cevaplar ve hata analizleri `notes/` altındaki ilgili dosyaya yazılacak ve `README.md` müfredat paneli güncellenecektir.
     - Dosya düzenlemeleri biter bitmez yapılan değişiklikler anlamlı commit mesajlarıyla (`docs(topic-xx): ...`) yerel git deposuna eklenecek ve GitHub'a (`git push origin main`) push edilecektir.
 
+---
+
+## 3. Müfredat Kapsamı ve Konu Dağılımı
+
+Eğitim sürecinde takip edilecek ana müfredat ve kapsamları:
+
+1. **Bit, Byte ve Sayı Sistemleri:** Binary, Decimal, Hexadecimal, taban değiştirme, bit işlemleri (AND, OR, XOR, NOT, bit kaydırma).
+2. **Lojik Kapılar:** AND, OR, NOT, XOR kapıları, doğruluk tabloları ve temel çalışma mantıkları.
+3. **Elektriksel Sinyaller:** HIGH/LOW, yükselen ve düşen kenar, kare dalga, sinüzoidal sinyal, PWM ve STEP sinyalleri.
+4. **Programlama Temelleri:** Değişkenler, veri tipleri, değişken isimlendirme, atama işlemleri, if-else, for/while döngüleri, fonksiyonlar ve diziler.
+5. **Algoritma Kurma:** Problemi analiz etme, adım adım çözüm geliştirme, akış diyagramları ve sözde kod oluşturma.
+6. **Geliştirme Ortamları ve İşletim Sistemleri:** IDE nedir, VS Code nedir, derleyici nedir, Linux ve Ubuntu nedir, aralarındaki farklar ve kullanım amaçları.
+7. **Mikrodenetleyici Mimarisi:** MCU, CPU, RAM, Flash, GPIO, register ve firmware kavramları.
+8. **Haberleşme Protokolleri:** UART, I2C ve SPI haberleşmelerinin temel mantığı, paket anatomisi, kullanım alanları ve farkları.
+9. **Pointer ve Struct:** Bellek adresleri, pointer mantığı, adres ve değer operatörleri, struct yapıları ve kullanım amaçları.
+10. **Interrupt (Kesme):** Interrupt nedir, polling ile farkı, ISR mantığı, volatile ve gömülü sistemlerde kullanım alanları.
+11. **Timer ve Zamanlama:** Delay, timer, millis, PWM ve bloklayan/bloklamayan kod mantığı.
+12. **Debug ve Datasheet Okuma:** Hata ayıklama, Serial Monitor, breakpoint, pinout, datasheet ve register tablolarını okuma.
+
+
 

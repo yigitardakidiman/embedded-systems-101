@@ -39,16 +39,40 @@ Bu doküman; gömülü sistemlerde donanımlar ve çipler arası veri aktarımı
 - **Adresleme Mantığı (Bus / Veri Yolu):**
   - Aynı `SDA` ve `SCL` hatlarına onlarca farklı sensör paralel bağlanabilir.
   - Her Slave cihazın benzersiz bir **7-bitlik donanım adresi** vardır (Örn: `0x68`, `0x3C`). Master hatta önce konuşacağı cihazın adresini gönderir.
-- **Open-Drain ve Pull-Up Şartı:** Hatların kısa devre olmaması için pinler Open-Drain modunda çalışır ve hatlara harici **Pull-up dirençleri** bağlanması zorunludur.
+
+### 8.2.1 Donanımsal Yapı: Push-Pull vs Open-Drain ve Pull-Up Dirençleri
+- **Push-Pull Neden Kullanılamaz?**
+  - Push-Pull modunda pinde hem üst ($3.3\text{V}$) hem alt (`GND`) transistör aktiftir. Eğer iki cihaz aynı hatta biri $3.3\text{V}$ diğeri $0\text{V}$ basarsa hat üzerinde **kısa devre** oluşur ve çipler yanar.
+- **Open-Drain Çözümü:**
+  - Çiplerin içindeki üst transistör iptal edilmiştir. Çip **sadece hattı toprağa ($0\text{V}$ - LOW)** çekebilir.
+  - HIGH ($1$) olmak istediğinde pini tamamen serbest (boşta) bırakır.
+  - Hat, dışarıya bağlanan **Pull-Up dirençleri** ($4.7\text{ k}\Omega$) sayesinde güvenle $+3.3\text{V}$ seviyesine çıkar. Biri hattı $0\text{V}$'a çekse dahi akım sadece güvenlik direnci üzerinden geçer; **asla kısa devre oluşmaz.**
+
+### 8.2.2 I2C Paket Anatomisi ve İletişim Akışı
+I2C hattında veri akarken temel kural şudur: **`SCL` HIGH iken `SDA` sabit kalmalıdır; veri sadece `SCL` LOW iken değiştirilebilir.** İletişim durumları bu kuralın istisnalarıyla yönetilir:
+
+1. **Start Koşulu:** `SCL` HIGH ($1$) iken, Master `SDA` hattını aniden LOW ($0$)'a çeker. Hatta bağlı tüm çipler iletişimin başladığını anlar.
+2. **7-Bit Slave Adresi:** Master iletişime geçmek istediği cihazın benzersiz adresini hatta basar.
+3. **8. Bit (Read / Write Biti):**
+   - `0` (Write - Yazma): Master cihaza veri göndereceğini bildirir.
+   - `1` (Read - Okuma): Master cihazdan veri okuyacağını bildirir.
+4. **9. Saat Darbesi (ACK / NACK):** Master 8 biti gönderdikten sonra `SDA` hattını serbest bırakır:
+   - **ACK (`0`):** Hedef çip hattı yere çekerek *"Buradayım, dinliyorum"* der.
+   - **NACK (`1`):** Hat $3.3\text{V}$'ta kalır; *"Cihaz yok veya meşgul"* anlamına gelir.
+5. **Veri Paketleri (Data Packs):** Veriler 8'er bitlik baytlar halinde akar. Her baytın ardından alıcı 9. saatte bir ACK (`0`) gönderir.
+6. **Stop Koşulu:** İletişim bittiğinde `SCL` HIGH iken `SDA` hattı LOW'dan HIGH'a bırakılır; hat boşa (Idle) döner.
+7. **Çoklu Master ve Tahkimat (Arbitration):** Hatta aynı anda iki Master konuşursa, Open-Drain sayesinde hattı `0`'a çeken Master önceliği kazanır; `1` basmak isteyen Master hattın `0` olduğunu görüp sessizce geri çekilir.
 
 ### Soru - Cevap
 > **Soru:**  
 > 1) I2C'de UART'ın aksine neden önceden bir Baud Rate anlaşması şart değildir? Ritmi kim belirler?  
 > 2) Aynı SDA/SCL hattına aynı anda hem sıcaklık sensörü hem OLED ekran bağlandığında MCU bu iki cihazla karışıklık yaşamadan nasıl iletişim kurar?  
+> 3) Open-Drain modunda çalışan bir hatta biri $0\text{V}$ çekerken diğeri serbest bıraktığında neden kısa devre oluşmaz?  
 > **Öğrenci Cevabı:**  
 > 1) Çünkü I2C'de `SCL` denen clock hattı vardır ve bu iletişim hızını kontrol eder.  
 > 2) Her modülün kendi kodu (adresi) vardır ve bu sayede mikroişlemci o kod ile ilgili sensörle haberleşir.  
-> **Değerlendirme:** Tamamen doğru.
+> 3) Open-Drain sadece LOW verir ($0\text{V}$'a çeker). HIGH olmak istediğinde ise pini serbest bırakır. Voltaj dışarıdaki direnç üzerinden geldiği için kısa devre olmaz, güvenlik direnci üzerinden küçük bir akım geçer.  
+> **Değerlendirme:** Tamamen doğru. Donanımsal ve mantıksal kavrayış eksiksiz.
 
 ---
 
@@ -65,6 +89,12 @@ Bu doküman; gömülü sistemlerde donanımlar ve çipler arası veri aktarımı
   - SPI'da yazılımsal 7-bit adres **yoktur**.
   - `SCK`, `MOSI`, `MISO` hatları tüm cihazlara paralel gider; ancak **her yeni Slave için MCU'dan ayrı bir `CS` pini** çekilir.
   - Çok fazla sensör bağlanırsa MCU'nun GPIO bacakları hızla tükenir.
+- **SPI Saat Modları (CPOL ve CPHA):**
+  - Sensör datasheet'lerinde SPI iletişimini senkronize eden iki kritik parametre bulunur:
+    - **CPOL (Clock Polarity - Saat Kutuplanması):** Saat hattının boşta (idle) dururken hangi voltaj seviyesinde bekleyeceğini belirler (`CPOL=0`: Boşta LOW, `CPOL=1`: Boşta HIGH).
+    - **CPHA (Clock Phase - Saat Fazı):** Veri bitlerinin saat sinyalinin hangi kenarında örnekleneceğini (okunacağını) belirler (`CPHA=0`: İlk kenarda, `CPHA=1`: İkinci kenarda).
+  - Master ile Slave'in CPOL/CPHA modları birebir aynı ayarlanmalıdır; aksi halde veriler kayar ve bozuk okunur.
+
 
 ### Soru - Cevap
 > **Soru:**  

@@ -36,3 +36,7 @@ Release/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Large Documents & Books
+*.pdf
+
