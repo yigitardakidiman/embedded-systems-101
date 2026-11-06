@@ -131,3 +131,22 @@ Bu doküman; seri ve paralel haberleşme temellerini, senkron/asenkron iletişim
 > 1) **Renkli TFT Ekran (60 FPS Grafik) $\rightarrow$ SPI:** Saniyede milyonlarca piksel verisi aktarılacağı için en yüksek bant genişliğine ve hıza sahip protokol olan SPI seçilir.  
 > 2) **3 Adet Çevre Sensörü (Sıcaklık, Nem, Basınç - Pin Kısıtlı) $\rightarrow$ I2C:** Veriler yavaş değişir ve hız kritik değildir. Yazılımsal adresleme sayesinde 3 sensörün tamamı sadece **2 pin** (SDA, SCL) harcanarak bağlanır.  
 > 3) **Bilgisayara Metin Loglama $\rightarrow$ UART:** İletişim iki cihaz arasında birebirdir (Point-to-Point) ve harici kabloda saat hattı (Clock) taşımadan en sade şekilde asenkron haberleşme sağlar.
+
+---
+
+## 8.7 Konu Sonu Değerlendirme Testi (Drone Uçuş Kontrol Kartı Senaryosu)
+
+1. **Soru (GPS Modülü - Saat Hattı Yok, Tek Yönlü Veri Akışı):**
+   - **İlk Yanıt:** Clock yoksa UART'tır (Asenkron), Full-Duplex'tir.
+   - **Düzeltme ve Son Yanıt:** Asenkron tespiti doğru. Ancak MCU'dan GPS'e veri gitmediği (tek yönlü akış olduğu) için **Simplex** modundadır. *(Tamamlandı)*
+2. **Soru (Telemetri Modülü UART Bağlantısı ve Çerçeve Yapısı):**
+   - **Öğrenci Yanıtı:** $TX \rightarrow RX$'e bağlanır, ortak $GND$ şarttır. Hat boştayken HIGH'dır, Start biti LOW'a çeker, Stop biti tekrar HIGH konumuna getirir. *(Tam puan)*
+3. **Soru (Barometre `0x76` / `111 0110` I2C Donanımı, Write Paketi ve ACK):**
+   - **İlk Yanıt:** Push-pull direnci eklenmeli. Sola 1 bit kaydırılır `1110 1100` olur. ACK `0` yani LOW yapar.
+   - **Düzeltme ve Son Yanıt:** Adres baytı (`1110 1100`) ve ACK (LOW) tamamen doğru. Direncin adı GPIO modu olan Push-Pull değil, **Pull-Up direnci**dir. *(Tamamlandı)*
+4. **Soru (3 Cihazlı SPI Pin Hesabı ve CS Seviyeleri):**
+   - **Yanıt ve Analiz:** SCK, MOSI, MISO ($3\text{ ortak pin}$) + her cihaz için ayrı CS ($3\text{ pin}$) = toplam **$6\text{ pin}$** kullanılır. SD kart seçilirken onun CS pini **LOW**, diğer iki cihazın CS pinleri **HIGH** tutulur.
+5. **Soru (8 Sensör İçin SPI vs I2C Pin Karşılaştırması):**
+   - **İlk Yanıt:** SPI $3+8=11\text{ pin}$, I2C $3\times 8=24\text{ pin}$.
+   - **Düzeltme ve Son Yanıt:** SPI için $3+N$ formülü doğru ($11\text{ pin}$). I2C'de ise tüm sensörler yazılımsal adresle seçildiği için kaç sensör bağlanırsa bağlansın (10 sensörde bile: SPI $3+10=13\text{ pin}$ harcarken) **I2C sadece 2 pin (SDA, SCL)** harcar. *(Tamamlandı)*
+
