@@ -20,8 +20,8 @@ Her konu; detaylı teorik anlatımını, donanımsal mikrodenetleyici karşılı
 | **6** | **Geliştirme Ortamları ve İşletim Sistemleri** | Tamamlandı | [06_gelistirme_ortamlari.md](notes/06_gelistirme_ortamlari.md) |
 | **7** | **Mikrodenetleyici Mimarisi** | Tamamlandı | [07_mikrodenetleyici_mimarisi.md](notes/07_mikrodenetleyici_mimarisi.md) |
 | **-** | **Genel Değerlendirme Sınavı (1-7)** | Tamamlandı | [sinav_01_genel_degerlendirme.md](notes/sinav_01_genel_degerlendirme.md) |
-| **8** | **Haberleşme Protokolleri (UART, I2C, SPI)** | *Devam Ediyor* | `notes/08_haberlesme_protokolleri.md` |
-| **9** | **Pointer ve Struct** | Beklemede | `notes/09_pointer_ve_struct.md` |
+| **8** | **Haberleşme Protokolleri (UART, I2C, SPI)** | Tamamlandı | [08_haberlesme_protokolleri.md](notes/08_haberlesme_protokolleri.md) |
+| **9** | **Pointer ve Struct** | *Devam Ediyor* | `notes/09_pointer_ve_struct.md` |
 | **10** | **Interrupt (Kesme)** | Beklemede | `notes/10_interrupt_kesme.md` |
 | **11** | **Timer ve Zamanlama** | Beklemede | `notes/11_timer_ve_zamanlama.md` |
 | **12** | **Debug ve Datasheet Okuma** | Beklemede | `notes/12_debug_ve_datasheet.md` |
