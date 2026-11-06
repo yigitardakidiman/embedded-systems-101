@@ -47,6 +47,7 @@ Bu doküman, kullanıcıya elektrik-elektronik ve gömülü sistemler temellerin
 
 12. **Bölüm Sonu Değerlendirme Testi (Zorunlu Konu Testi):**
     - Her ana bölümün (konunun) alt başlıkları tamamlandığında, bir sonraki konuya geçmeden önce **kesinlikle tüm alt başlıkları kapsayan senaryo tabanlı bir Bölüm Sonu Değerlendirme Testi** uygulanacaktır.
+    - Test soruları toplu halde değil, **teker teker (her seferinde tek bir soru)** sorulacak ve öğrencinin yanıtı alındıktan sonra bir sonraki test sorusuna geçilecektir.
     - Öğrencinin testteki yanıtları analiz edilip olası eksikler giderildikten ve tam öğrenme doğrulandıktan sonra bölüm tamamlanmış sayılacaktır.
 
 13. **Otomatik Dokümantasyon ve GitHub Senkronizasyonu:**

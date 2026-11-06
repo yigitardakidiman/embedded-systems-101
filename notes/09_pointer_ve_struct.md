@@ -98,3 +98,28 @@ Bu doküman; RAM bellek adresleme mantığını, Pointer (`&` ve `*`) operatörl
 > 1) `m_ptr->hiz_rpm = 0;`  
 > 2) `USART1` struct pointer'dır çünkü `->` işareti kullanılmış; `.` kullanılsaydı değerin (değişkenin) kendisi olacaktı.  
 > **Değerlendirme:** Tamamen doğru.
+
+---
+
+## 9.5 Konu Sonu Değerlendirme Testi (Akıllı Sera ve Sulama Otomasyonu Senaryosu)
+
+1. **Soru (`nem_esigi = 40; p_esik = &nem_esigi; *p_esik = 65;`):**
+   - **Öğrenci Yanıtı:** `p_esik` adresi (`0x20000100`) tutar, `*p_esik` `65` değerini verir ve `nem_esigi` `65` olarak güncellenir. *(Tam puan)*
+2. **Soru (`basinc_guncelle(uint16_t *basinc_ptr)` Çağrısı ve RAM Avantajı):**
+   - **Öğrenci Yanıtı:** 1) `basinc_guncelle(&pompa_basinci);` 2) RAM'e sadece $4\text{ bayt}$ büyüklüğündeki adres gider, böylece büyük verilerde RAM dolmamış olur. *(Tam puan)*
+3. **Soru (`SeraFani_t` Struct Tanımlama ve `.` Operatörü):**
+   - **Öğrenci Yanıtı:**
+     ```c
+     SeraFani_t tavan_fani;
+     tavan_fani.devir_rpm = 1500;
+     tavan_fani.aktif_mi = 1;
+     ```
+     *(Tam puan)*
+4. **Soru (`acil_fan_durdur(SeraFani_t *f_ptr)` ve `GPIOB->ODR` Yapısı):**
+   - **Öğrenci Yanıtı:**
+     ```c
+     f_ptr->devir_rpm = 0;
+     f_ptr->aktif_mi = 0;
+     ```
+     `GPIOB` doğrudan donanımın adresine erişen bir Struct Pointer olduğu için `->` kullanılır. *(Tam puan - 4/4 Hatasız)*
+
