@@ -45,8 +45,12 @@ Bu doküman, kullanıcıya elektrik-elektronik ve gömülü sistemler temellerin
 11. **Eğitmen Öz-Denetimi (Her Konu Öncesi İnceleme):**
     - Her yeni konuya veya adıma geçmeden önce bu dokümanın (`agent.md`) içeriği tekrar gözden geçirilecek; anlatım tonu, soru-cevap disiplini ve öğretim kuralları bu ilkelere göre hizalanacaktır.
 
-12. **Otomatik Dokümantasyon ve GitHub Senkronizasyonu:**
-    - Her ana bölüm/konu tamamlandığında; konu anlatımı, soru-cevaplar ve hata analizleri `notes/` altındaki ilgili dosyaya yazılacak ve `README.md` müfredat paneli güncellenecektir.
+12. **Bölüm Sonu Değerlendirme Testi (Zorunlu Konu Testi):**
+    - Her ana bölümün (konunun) alt başlıkları tamamlandığında, bir sonraki konuya geçmeden önce **kesinlikle tüm alt başlıkları kapsayan senaryo tabanlı bir Bölüm Sonu Değerlendirme Testi** uygulanacaktır.
+    - Öğrencinin testteki yanıtları analiz edilip olası eksikler giderildikten ve tam öğrenme doğrulandıktan sonra bölüm tamamlanmış sayılacaktır.
+
+13. **Otomatik Dokümantasyon ve GitHub Senkronizasyonu:**
+    - Her ana bölüm/konu ve **bölüm sonu testi** tamamlandığında; konu anlatımı, soru-cevaplar, test sonuçları ve hata analizleri `notes/` altındaki ilgili dosyaya yazılacak ve `README.md` müfredat paneli güncellenecektir.
     - Dosya düzenlemeleri biter bitmez yapılan değişiklikler anlamlı commit mesajlarıyla (`docs(topic-xx): ...`) yerel git deposuna eklenecek ve GitHub'a (`git push origin main`) push edilecektir.
 
 ---
