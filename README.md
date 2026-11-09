@@ -23,8 +23,8 @@ Her konu; detaylı teorik anlatımını, donanımsal mikrodenetleyici karşılı
 | **8** | **Haberleşme Protokolleri (UART, I2C, SPI)** | Tamamlandı | [08_haberlesme_protokolleri.md](notes/08_haberlesme_protokolleri.md) |
 | **9** | **Pointer ve Struct** | Tamamlandı | [09_pointer_ve_struct.md](notes/09_pointer_ve_struct.md) |
 | **10** | **Interrupt (Kesme)** | Tamamlandı | [10_interrupt_kesme.md](notes/10_interrupt_kesme.md) |
-| **11** | **Timer ve Zamanlama** | *Devam Ediyor* | `notes/11_timer_ve_zamanlama.md` |
-| **12** | **Debug ve Datasheet Okuma** | Beklemede | `notes/12_debug_ve_datasheet.md` |
+| **11** | **Timer ve Zamanlama** | Tamamlandı | [11_timer_ve_zamanlama.md](notes/11_timer_ve_zamanlama.md) |
+| **12** | **Debug ve Datasheet Okuma** | *Devam Ediyor* | `notes/12_debug_ve_datasheet.md` |
 
 ---
 
