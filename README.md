@@ -24,6 +24,7 @@ Her konu; detaylı teorik anlatımını, donanımsal mikrodenetleyici karşılı
 | **9** | **Pointer ve Struct** | Tamamlandı | [09_pointer_ve_struct.md](notes/09_pointer_ve_struct.md) |
 | **10** | **Interrupt (Kesme)** | Tamamlandı | [10_interrupt_kesme.md](notes/10_interrupt_kesme.md) |
 | **11** | **Timer ve Zamanlama** | Tamamlandı | [11_timer_ve_zamanlama.md](notes/11_timer_ve_zamanlama.md) |
+| **-** | **Genel Değerlendirme Sınavı (1-11)** | Tamamlandı | [sinav_02_genel_degerlendirme.md](notes/sinav_02_genel_degerlendirme.md) |
 | **12** | **Debug ve Datasheet Okuma** | *Devam Ediyor* | `notes/12_debug_ve_datasheet.md` |
 
 ---
