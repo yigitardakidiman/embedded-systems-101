@@ -14,6 +14,25 @@ Gömülü sistemler fiziksel dünya ile etkileşime giren sistemlerdir. Kod yazm
 
 - **Uç Durum (Edge Case / Güvenlik Analizi):** Normal çalışma akışı dışındaki risklerin (kablo kopması, sensör arızası, sıkışma vb.) baştan tespit edilip algoritmaya güvenlik önlemlerinin eklenmesidir.
 
+```mermaid
+flowchart LR
+    subgraph I["GİRDİLER (Inputs)"]
+        I1["Bilet Butonu"]
+        I2["Araç Algılama Sensörü"]
+        I3["Güvenlik Fotoseli (Edge Case)"]
+    end
+
+    subgraph P["SÜREÇ (MCU Karar)"]
+        P1["Durum ve Güvenlik Kontrolü"]
+    end
+
+    subgraph O["ÇIKTILAR (Outputs)"]
+        O1["Bariyer Motoru (Yukarı/Aşağı)"]
+    end
+
+    I1 & I2 & I3 --> P1 --> O1
+```
+
 ### Soru - Cevap
 > **Soru:** Otomatik otopark bariyer sistemi için: 1) Girdiler, 2) Çıktılar, 3) Düşünülmesi gereken en az bir Uç Durum (Edge Case) nedir?  
 > **Öğrenci Cevabı:**  
@@ -34,6 +53,23 @@ Mantıksal akışı görselleştirmek için kullanılan uluslararası semboller:
 - **Eşkenar Dörtgen / Baklava (Karar / Decision):** Mantıksal şart (`if`). İçinden iki çıkış oku çıkar: **EVET (True)** ve **HAYIR (False)**.
 - **Geri Dönen Oklar:** Bir işlemin ardından akışın başa dönmesi gömülü sistemlerdeki `while(1)` sonsuz döngüsünü temsil eder.
 
+| Sembol | Şekil | Gömülüdeki Anlamı |
+|---|---|---|
+| **Terminal** | `([ BAŞLA ])` | Programın başlangıcı / bitişi |
+| **Girdi / Çıktı (I/O)** | `[/ Pin Oku /]` | Sensör, buton veya UART verisi okuma |
+| **İşlem (Process)** | `[ İşlem ]` | Değişken güncelleme, hesaplama, çıkış verme |
+| **Karar (Decision)** | `{ Şart? }` | `if` koşulu (EVET / HAYIR olmak üzere 2 çıkış) |
+
+```mermaid
+flowchart TD
+    S(["BAŞLA"]) --> IO[/"Buton Durumunu Oku"/]
+    IO --> Q{"Butona Basıldı mı?"}
+    Q -- "EVET" --> A1["LED'i Yak (HIGH)"]
+    Q -- "HAYIR" --> A2["LED'i Söndür (LOW)"]
+    A1 --> IO
+    A2 --> IO
+```
+
 ### Soru - Cevap
 > **Soru:** Bir mikrodenetleyicide butona basılınca LED yakan, basılmayınca söndüren ve sürekli çalışan sistemin akış şemasında:  
 > 1) "Butona basıldı mı?" hangi şekille gösterilir, kaç ok çıkar?  
@@ -52,6 +88,15 @@ Bunun önüne geçmek için:
 1. **Durum Değişkeni (State/Flag):** `led_durumu` saklanır.
 2. **Durum Tersleme:** `led_durumu = !led_durumu;` (veya XOR: `led_durumu ^= 1;`).
 3. **Elin Çekilmesini Bekleme (Bloklama / Debounce):** Kullanıcı butonu bırakana kadar döngüde beklenir.
+
+```text
+  Parmağın Butona Basma Süresi (~100 ms):
+  Buton:  ______/‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\______
+                |<-- MCU 100.000+ kez okur -->|
+
+  1) Flag/Bekleme YOKSA:  LED -> 1,0,1,0,1,0,1,0... (Rastgele kalır!)
+  2) Flag + while(press): LED -> ^1 (Yükselen anda SADECE 1 kez değişir, bırakılana kadar bekler)
+```
 
 ### Soru - Cevap
 > **Soru 1:** Başlangıçta `led_durumu = 0` iken butona basıldığında bu durumu tersine çevirmek için nasıl bir şart kurulur?  

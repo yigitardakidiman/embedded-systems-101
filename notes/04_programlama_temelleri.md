@@ -21,6 +21,22 @@ Farklı mimarilerde `int` boyutlarının değişmesi (8-bit MCU'da 16 bit, 32-bi
 - C dilinde ve CPU donanımında **çalışma zamanında hiçbir hata veya uyarı verilmez; program durmaz.**
 - $0$ değerinden $1$ çıkarıldığında ise geriye doğru takla atar ve sonuç **$255$** olur (Underflow).
 
+```text
+  Bellek Genişliği Karşılaştırması:
+  uint8_t  : [  1 Bayt  ] (8 bit)
+  uint16_t : [  1 Bayt  ][  1 Bayt  ] (16 bit)
+  uint32_t : [  1 Bayt  ][  1 Bayt  ][  1 Bayt  ][  1 Bayt  ] (32 bit)
+
+  uint8_t Overflow (Taşma) & Underflow (Kilometre Sayacı Mantığı):
+    255:    [1][1][1][1][1][1][1][1]
+         +1
+    --------------------------------
+    256: [1][0][0][0][0][0][0][0][0]  --> Sonuç: 0  (9. Carry biti 8-bitlik kutuya sığmaz, düşer!)
+          ^-- Taşan Bit
+
+    0 - 1  --->  Geriye sarar  --->  [1][1][1][1][1][1][1][1] = 255 (Hata verilmez!)
+```
+
 ### Soru - Cevap
 > **Soru:**  
 > 1) $0-1000$ arası analog sensör değerini saklamak için en az yer kaplayan doğru `<stdint.h>` tipi hangisidir?  
@@ -42,6 +58,16 @@ Farklı mimarilerde `int` boyutlarının değişmesi (8-bit MCU'da 16 bit, 32-bi
   - `x |= (1 << n);` $\rightarrow$ $n$. biti HIGH yapar.
   - `x &= ~(1 << n);` $\rightarrow$ $n$. biti LOW yapar.
 
+```text
+  +-----------------------------------+     +-----------------------------------+
+  |  FLASH BELLEK (ROM - Kalıcı)      |     |  RAM (SRAM - Geçici / Kısıtlı)    |
+  |  -------------------------------  |     |  -------------------------------  |
+  |  * Derlenmiş Program Kodu         |     |  * Normal Değişkenler (sayac)     |
+  |  * const uint8_t PIN = 5;         |     |  * Diziler / Tamponlar (Buffer)   |
+  |  * Değiştirilemez Sabit Tablolar  |     |  * Stack (Fonksiyon Çağrıları)    |
+  +-----------------------------------+     +-----------------------------------+
+```
+
 ### Soru - Cevap
 > **Soru:** 1) `uint8_t PIN = 5;` yerine `const uint8_t PIN = 5;` yazmanın donanımsal avantajı nedir? 2) `bayrak = 0b00000001; bayrak |= (1 << 2);` binary sonucu ne olur?  
 > **Öğrenci Cevabı:** 1) `const` yapıldığında ROM'da yer tutar ve RAM'den yemez. 2) `0000 0101` olur.  
@@ -54,6 +80,24 @@ Farklı mimarilerde `int` boyutlarının değişmesi (8-bit MCU'da 16 bit, 32-bi
 - `=` operatörü atamadır (değer yazar). `==` operatörü eşitlik karşılaştırmasıdır.
 - `if (buton = 1)` yazılırsa değişkene 1 atanır ve ifade her zaman TRUE (Doğru) kabul edilir!
 - `switch-case` gömülü sistemlerde Durum Makinelerini (Finite State Machine - FSM) kurmak için kullanılır. `break;` unutulursa alttaki case'e doğrudan akar (fall-through).
+
+```mermaid
+stateDiagram-v2
+    [*] --> BEKLEME: Sistem Açıldı
+    BEKLEME --> CALISMA: Başlat Butonu (break var)
+    CALISMA --> HATA: Sensör Arızası
+    HATA --> BEKLEME: Reset
+```
+
+```text
+  switch-case'de "break;" Unutulursa (Fall-Through Hatası):
+    case 1:
+        motor_ac();
+        // break; UNUTULDU!  --+
+    case 2:                    | Akış doğrudan aşağı sızar!
+        alarm_cal();  <--------+ (İstenmeyen ikinci işlem de çalışır)
+        break;
+```
 
 ### Soru - Cevap
 > **Soru:** 1) `if (buton = 1)` ile `if (buton == 1)` farkı nedir? 2) `case` sonuna `break;` konulmazsa ne olur?  
@@ -68,6 +112,18 @@ Farklı mimarilerde `int` boyutlarının değişmesi (8-bit MCU'da 16 bit, 32-bi
 - Bu yüzden her gömülü program bir **Sonsuz Döngü (Super-Loop / Ana Döngü)** içerir: `while(1) { ... }`.
 - **Bloklayan Kod (Blocking Code):** `while (sensor_hazir == 0);` gibi donanım yanıtı bekleyen kodlar, donanım arızalanırsa işlemciyi sonsuza kadar kilitler.
 
+```mermaid
+flowchart TD
+    A(["Güç Verildi / Reset"]) --> B["main() Başlar"]
+    B --> C["Donanım Ayarları (GPIO, Timer, UART Init)"]
+    C --> D{"while(1) Super-Loop"}
+    D --> E["Sensör Oku"]
+    E --> F{"Bloklayan Satır: while(hazir == 0);"}
+    F -- "Kablo Koptu (Hep 0)" --> F
+    F -- "Veri Geldi (1)" --> G["Çıkışları Güncelle"]
+    G --> D
+```
+
 ### Soru - Cevap
 > **Soru:** 1) `main()` içinde neden mutlaka `while(1)` bulunur? 2) `while(veri_geldi_mi() == 0);` satırında kablo koparsa sistem ne yapar?  
 > **Öğrenci Cevabı:** 1) `main()` 1 kere çalışıp biterse kod tanımsız yerde biter. 2) `while` içi sürekli true olacağı için sonsuz döngüye girip sistemi dondurur.  
@@ -80,6 +136,21 @@ Farklı mimarilerde `int` boyutlarının değişmesi (8-bit MCU'da 16 bit, 32-bi
 - Bir fonksiyon çağrıldığında işlemci o anki dönüş adresini ve fonksiyonun yerel değişkenlerini RAM'deki **Stack (Yığın)** alanına kaydeder.
 - Mikrodenetleyicilerde Stack alanı çok dardır (örn: 512B - 1KB).
 - Kendi kendini çağıran fonksiyonlar (**Recursion**) Stack'i çok hızlı tüketerek **Stack Overflow** yaratır ve sistemi çökertir. Bu nedenle gömülü sistem standartlarında (MISRA-C) özyineleme yasaktır.
+
+```text
+  RAM Yerleşimi ve Stack Overflow (Yığın Taşması):
+  +-------------------------------------+  Düşük Adres
+  | Global Değişkenler / Diziler (Data) |
+  +-------------------------------------+
+  |         Boş RAM Alanı               |  <-- ÇARPIŞMA! (Stack aşağı taşarsa
+  |               ^                     |      global değişkenleri ezer!)
+  |               |  (Stack Büyür)      |
+  +---------------+---------------------+
+  | fonk_B() yerel değişken + dönüş adr |
+  | fonk_A() yerel değişken + dönüş adr |
+  | main()   yerel değişkenler          |  Yüksek Adres (Stack Tabanı)
+  +-------------------------------------+
+```
 
 ### Soru - Cevap
 > **Soru:** 1) Girdi almayan ve değer döndürmeyen `buzzer_sustur` fonksiyon başlığı nedir? 2) Gömülüde recursive fonksiyonların yasaklanmasının donanımsal sebebi nedir?  
@@ -94,6 +165,16 @@ Farklı mimarilerde `int` boyutlarının değişmesi (8-bit MCU'da 16 bit, 32-bi
   $$\text{RAM Alanı} = \text{Eleman Sayısı} \times \text{Tip Boyutu}$$
 - Haberleşmede gelen baytlar dizilere (Buffer / Tampon) toplanır.
 - C dili dizi sınır denetimi (bounds check) yapmaz. 10 elemanlı dizinin 10. indeksine (`[10]`) yazılırsa yanındaki bellek hücresinin üzerine yazar (**Buffer Overflow / Memory Corruption**).
+
+```text
+  uint16_t adc_kayitlari[10];  (10 eleman x 2 Bayt = 20 Bayt ardışık RAM)
+  +--------+--------+--------+-----+--------+ | +------------------+
+  | [0] 2B | [1] 2B | [2] 2B | ... | [9] 2B | | | Komşu Değişken   |
+  +--------+--------+--------+-----+--------+ | +------------------+
+  0x2000   0x2002   0x2004         0x2012     | 0x2014 (Sınır Dışı!)
+                                              |
+     adc_kayitlari[10] = 500;  ---------------+---> Komşu veriyi ezer!
+```
 
 ### Soru - Cevap
 > **Soru:** 1) `uint16_t adc_kayitlari[10];` RAM'de kaç bayt yer tutar? İlk ve son eleman indeksleri nedir? 2) `adc_kayitlari[10] = 500;` yazılırsa ne olur?  

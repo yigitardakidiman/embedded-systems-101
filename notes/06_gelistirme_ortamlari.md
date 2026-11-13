@@ -14,6 +14,14 @@ Mikrodenetleyiciler sadece $0$ ve $1$'lerden oluşan **Makine Kodunu (Binary)** 
    - **Cross-Compiler (Çapraz Derleyici):** Kendi bilgisayarında (x86) çalışıp, hedef mikrodenetleyici (ARM Cortex-M, AVR vb.) için makine kodu üreten derleyicidir (`arm-none-eabi-gcc`). Gömülü sistemlerde kural olarak çapraz derleyiciler kullanılır.
 3. **IDE (Tümleşik Geliştirme Ortamı):** Editör, derleyici, hata ayıklayıcı (debugger) ve kod yükleme araçlarını tek bir arayüzde toplayan yazılımdır (STM32CubeIDE, Keil MDK, MPLAB X).
 
+```mermaid
+flowchart LR
+    C["main.c / driver.h\n(Metin Editörü / IDE)"] --> CC["Cross-Compiler\n(arm-none-eabi-gcc)"]
+    CC --> OBJ["Makine Kodu\n(.elf / .bin / .hex)"]
+    OBJ --> PRG["Debug Probe\n(ST-Link / J-Link)"]
+    PRG --> MCU["Hedef MCU\n(Flash Bellek)"]
+```
+
 ### Soru - Cevap
 > **Soru:**  
 > 1) Bilgisayarında yazılan kodu ARM mikrodenetleyicinin makine koduna çeviren derleyici türü nedir?  
@@ -30,6 +38,19 @@ Mikrodenetleyiciler sadece $0$ ve $1$'lerden oluşan **Makine Kodunu (Binary)** 
 - **Dağıtım (Distribution):** Linux çekirdeğinin etrafına paket yöneticisi, masaüstü arayüzü ve sistem araçları eklenerek oluşturulan tam işletim sistemidir (Örn: Ubuntu, Debian, Fedora).
 - **Gömülü Linux (Embedded Linux):** Yüksek işlem gücü, ağ desteği (Ethernet, WiFi), dosya sistemleri ve grafik arayüz gerektiren güçlü işlemcilerde (Raspberry Pi, akıllı TV, araç eğlence sistemleri) tercih edilir.
 - **Determinizm ve Gerçek Zamanlılık (Real-Time):** Can güvenliği ve anlık tepki gerektiren sistemlerde (ABS fren, hava yastığı, motor kontrol) Linux'un zamanlama belirsizliklerinden kaçınmak için doğrudan **Bare-Metal (çıplak C)** veya **RTOS** çalıştıran mikrodenetleyiciler kullanılır.
+
+```text
+  GÖMÜLÜ LİNUX MİMARİSİ (Navigasyon, Akıllı TV)    BARE-METAL / RTOS (ABS Fren, Motor)
+  +--------------------------------------------+    +----------------------------------+
+  | Kullanıcı Uygulamaları (Arayüz, Ağ, Dosya) |    | Doğrudan C Uygulama Kodu         |
+  +--------------------------------------------+    | (Kesin Zamanlama / Determinizm)  |
+  | Dağıtım Araçları (Ubuntu / Yocto Paketler) |    +----------------------------------+
+  +--------------------------------------------+    | Register / HAL Sürücü Katmanı    |
+  | Linux Çekirdeği (Kernel)                   |    +----------------------------------+
+  +--------------------------------------------+    | MCU Donanımı (STM32, C2000)      |
+  | Güçlü İşlemci (MPU + Harici RAM / eMMC)    |    +----------------------------------+
+  +--------------------------------------------+
+```
 
 ### Soru - Cevap
 > **Soru:**  
@@ -76,4 +97,12 @@ Kodun mikrodenetleyiciye yüklenmesini (Flash) ve çalışırken adım adım izl
 - **J-Link (Segger):** Dünya çapında endüstri standardı olan, son derece hızlı ve neredeyse tüm mikrodenetleyici ailelerini destekleyen profesyonel hata ayıklayıcı.
 - **DAPLink / CMSIS-DAP:** ARM'ın açık kaynaklı standart debug donanımı.
 - **PICkit:** Microchip PIC/AVR mikrodenetleyicileri için donanımsal programlayıcı.
+
+```text
+  +-------------------+    USB     +--------------------+  SWDIO (Veri)   +----------------+
+  |  Geliştirme PC    |===========>|  ST-Link / J-Link  |---------------->|   Hedef MCU    |
+  |  (IDE / Debugger) |            |  (Hardware Probe)  |---------------->|  (STM32 / ARM) |
+  +-------------------+            +--------------------+  SWCLK (Saat)   |  Flash + RAM   |
+                                                           GND (Ortak)    +----------------+
+```
 
