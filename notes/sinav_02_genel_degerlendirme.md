@@ -7,6 +7,31 @@ Bu doküman; 1'den 11'e kadar işlenen tüm temel elektrik-elektronik, gömülü
 ## 📋 Sınav Senaryosu
 **Proje:** Endüstriyel Otonom CNC Lazer Kesim ve Filtrasyon Sistemi (STM32 Tabanlı).
 
+```mermaid
+flowchart LR
+    subgraph GUVENLIK["Donanımsal Güvenlik & Kesme"]
+        A["Kapak Kapalı (A=1)"] --> AND["AND Kapısı"]
+        B["Soğutma Normal (B=1)"] --> AND
+        AND --> NOT["NOT (Evirici)"]
+        ES["Acil Stop (EXTI IRQ)"] -- "ISR: Motor Dur + volatile flag" --> MCU
+    end
+
+    subgraph MCU["STM32 MCU (SYS_CTRL = 0x35)"]
+        CORE["Timer (72MHz / PSC -> 1ms)\nPWM (ARR=1000, CCR=300)\nEksen_t *e_ptr->hiz_rpm"]
+    end
+
+    subgraph CEVRE["Haberleşme & Aktüatörler"]
+        UART["PC Loglama (UART TX/RX + GND)"]
+        I2C["Sensörler (I2C SDA/SCL + Pull-Up)"]
+        SPI["SD/Ekran (SPI 3+N Pin, /CS=LOW)"]
+        STEP["CNC Step Motor (300 Hz, 600 Darbe)"]
+    end
+
+    NOT -- "/LASER_EN (Active-LOW)" --> LAZER["Lazer Tüpü"]
+    MCU <--> UART & I2C & SPI
+    MCU --> STEP
+```
+
 ---
 
 ## 1. Soru: Sayı Sistemleri, Bit Maskeleme ve Lojik Kapılar

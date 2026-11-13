@@ -16,6 +16,18 @@ Bu doküman; Gömülü sistemlerde Log tabanlı debug (`printf`) ile Donanımsal
   - **SWD (Serial Wire Debug):** Yalnızca 2 hat kullanır (`SWDIO`: Veri, `SWCLK`: Saat).
   - **Canlı İzleme (Live Watch):** Koda fazladan hiçbir `printf` satırı yazmadan veya kod zamanlamasını değiştirmeden, debugger harici hat üzerinden işlemci çalışırken RAM'deki değişken adreslerini okuyabilir.
 
+```text
+  1) Log Tabanlı Debug (printf / UART — Zamanlama Bozar):
+     [100us ISR] -> [printf: ~1500us UART Meşgul!] -> Sonraki 14 Timer kesmesi ÇAKIŞIR!
+
+  2) Donanımsal Debugger (SWD — Sıfır Zamanlama Müdahalesi):
+     +-------------+  SWDIO / SWCLK   +-----------------------------+
+     | PC Debugger |<================>| Cortex-M Debug Access Port  |
+     | (Live Watch)|                  | (RAM & Register'ları Okur)  |
+     +-------------+                  +-----------------------------+
+                                      (CPU kendi zamanında kesintisiz koşar!)
+```
+
 ### Soru - Cevap ve Hata Analizi
 > **Soru:** Hata ayıklarken `printf` kullanılırsa yazılım kodunda ve zamanlamasında ne gibi etkiler oluşur; donanımsal debugger (SWD) kullanıldığında koda dokunmak gerekir mi?  
 > **Öğrenci Yanıtı:** `printf` kullanırsak kodun kesmelerine zaman ayırmak gerekecektir (zamanlamayı bozar), ama SWD kullanırsak kodun zamanlamasında hiçbir değişiklik yapmamıza gerek kalmaz.  
@@ -29,6 +41,17 @@ Bu doküman; Gömülü sistemlerde Log tabanlı debug (`printf`) ile Donanımsal
 2. **Step Into (İçine Gir):** Bulunulan satırda bir fonksiyon çağrısı varsa (örn: `kalibre_et()`), o fonksiyonun gövdesine atlar ve içeride satır satır ilerler.
 3. **Step Over (Üzerinden Geç):** Bulunulan satırdaki fonksiyon çağrısını tek hamlede arka planda çalıştırıp tamamlar ve mevcut dosyadaki bir sonraki satıra geçer.
 4. **Watch Window (Değişken Takibi):** RAM'deki değişkenlerin anlık değerlerini listelemek ve izlemek için kullanılır.
+
+```text
+  Breakpoint (Halt) anında Step Over vs Step Into:
+    10: ham_veri = adc_oku();
+  ▶ 11: sicaklik = kalibre_et(ham_veri);   <-- [Breakpoint: CPU Burada Durdu]
+    12: if (sicaklik > 50) ...
+         |
+         +--- Step Over ---> Tek hamlede çalışır, doğrudan 12. satıra iner.
+         |
+         +--- Step Into ---> kalibre_et() fonksiyonunun içine girip satır satır ilerler.
+```
 
 ### Soru - Cevap
 > **Soru:** `float sicaklik = kalibre_et(ham_veri);` satırında durmuşken fonksiyonun iç hesaplamalarını görmek için hangi komut çalıştırılmalıdır? Diğer komuta basılırsa ne olur?  
@@ -49,6 +72,17 @@ Bu doküman; Gömülü sistemlerde Log tabanlı debug (`printf`) ile Donanımsal
   - Bacak sayısını optimize etmek için tek bir fiziksel pin birden fazla çevre birimine bağlanabilir (Örn: `PA9` hem GPIO, hem `USART1_TX`, hem `TIM1_CH2` olabilir).
   - Ancak bir fiziksel pin **aynı anda yalnızca tek bir fonksiyona** atanabilir.
 
+```text
+  Doküman Seçim Rehberi:
+  - Datasheet        : Voltaj (VDD), Pin Akımı (I_IO), Sıcaklık, Kılıf ve Pinout
+  - Reference Manual : Çevre Birimi Mimarisi, Register Adresleri ve Bit Tabloları
+
+  Pin Çoklama (Alternate Function MUX — Örn: PA9 Bacağı):
+    GPIO Çıkış (AF0)   ───\
+    TIM1_CH2 PWM (AF1) ────[ Seçici MUX ]===> Fiziksel Pin (PA9)
+    USART1_TX (AF7)    ───/    (Aynı anda yalnızca 1 işlev seçilebilir!)
+```
+
 ### Soru - Cevap
 > **Soru:** 1) GPIO maksimum akım sınırı ve çalışma voltajı için hangi dokümana bakılır? 2) `PA2` pini aynı anda hem buton okuma (GPIO) hem de UART TX olarak kullanılabilir mi?  
 > **Öğrenci Yanıtı:** 1) Datasheet'e bakılmalıdır. 2) Hayır, sadece tek bir fonksiyon çalıştırılabilir; ya GPIO ya da UART olacaktır.  
@@ -65,6 +99,21 @@ Reference Manual'deki yazmaç tablolarında 4 temel unsur yer alır:
 4. **Bit Maskeleme Operatörleri:**
    - Biti `1` yapmak (Set): `YAZMAC |= (1 << BIT_NO);`
    - Biti `0` yapmak (Clear): `YAZMAC &= ~(1 << BIT_NO);`
+
+```text
+  Örnek Register Tablosu: TIMx_CR1 / ADC_CR2
+  Fiziksel Adres = Base (0x4001 2400) + Offset (0x08) = 0x4001 2408
+  Reset Değeri   = 0x0000 0000 (Enerji verildiğinde tüm bitler 0)
+
+  Bit:  |  31 ... 2  |     1      |     0     |
+        +------------+------------+-----------+
+  Ad :  |  Reserved  |   CONT     |   ADON    |
+  Erişim|     -      |    rw      |    rw     |  (rw: Okunabilir/Yazılabilir)
+  Reset |   0...0    |     0      |     0     |  <-- Başlangıçta Kapalı (0)!
+        +------------+------------+-----------+
+                                        ^
+             ADC_CR2 |= (1 << 0); ------+ (Diğer bitleri bozmadan Bit 0'ı 1 yap)
+```
 
 ### Soru - Cevap ve Hata Analizi
 > **Soru:** `TIMx_CR1` tablosunda `Reset Değeri: 0x0000 0000` ve `Bit 0: CEN` ($0$: sayaç durduruldu, $1$: sayaç başlatıldı) verilmiştir.  

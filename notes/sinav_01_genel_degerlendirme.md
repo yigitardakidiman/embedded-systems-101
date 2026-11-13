@@ -7,6 +7,25 @@ Bu doküman; 1'den 7'ye kadar işlenen tüm konuların pekiştirilmesi amacıyla
 ## 📋 Sınav Senaryosu
 **Proje:** Akıllı Endüstriyel Sıvı Dozajlama ve Karıştırıcı Cihazı (STM32 Tabanlı).
 
+```mermaid
+flowchart LR
+    subgraph GIRDILER["Güvenlik ve Sensörler"]
+        A["Acil Stop (A)"] --> OR["OR Kapısı"]
+        B["Kazan Kapağı (B)"] --> OR
+        OR --> NOT["NOT (Evirici)"]
+        T["Sıcaklık (T > 60°C)"] --> MCU
+    end
+
+    subgraph MCU["STM32 MCU (Cross-Compiler / STM32CubeIDE)"]
+        REG["VALVE_REG = 0x4A\nconst Sabitler (Flash)\nuint16_t Dizi (RAM)"]
+    end
+
+    NOT -- "/SHUTDOWN (Active-LOW)" --> MOT["Motor Sürücü"]
+    MCU -- "PWM (AF Modu - 250 Hz)" --> KAR["Karıştırıcı Motor"]
+    MCU -- "STEP (1600 Hz) + DIR" --> DOZ["Dozajlama Step Motoru"]
+    MCU -- "GPIOB->ODR (PB0=3.3V)" --> VANA["Sıvı Valfi"]
+```
+
 ---
 
 ## 1. Soru: Sayı Sistemleri ve Bit İşlemleri
