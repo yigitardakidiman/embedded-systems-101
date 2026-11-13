@@ -26,6 +26,7 @@ Her konu; detaylı teorik anlatımını, donanımsal mikrodenetleyici karşılı
 | **11** | **Timer ve Zamanlama** | Tamamlandı | [11_timer_ve_zamanlama.md](notes/11_timer_ve_zamanlama.md) |
 | **-** | **Genel Değerlendirme Sınavı (1-11)** | Tamamlandı | [sinav_02_genel_degerlendirme.md](notes/sinav_02_genel_degerlendirme.md) |
 | **12** | **Debug ve Datasheet Okuma** | Tamamlandı | [12_debug_ve_datasheet.md](notes/12_debug_ve_datasheet.md) |
+| **-** | **Büyük Final Değerlendirme Sınavı (1-12)** | Tamamlandı | [sinav_03_genel_degerlendirme.md](notes/sinav_03_genel_degerlendirme.md) |
 
 ---
 
