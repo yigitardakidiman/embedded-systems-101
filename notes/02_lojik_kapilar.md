@@ -22,6 +22,14 @@ Bu doküman, mikrodenetleyicilerin işlemci (CPU) ve Aritmetik Mantık Biriminin
 
 - **Donanım Örneği:** Seri bağlı iki mekanik anahtar veya CNC tezgâhında "Güvenlik Kapağı Kapalı" (1) VE "Başlat Butonuna Basıldı" (1) koşulu sağlandığında motoru çalıştıran mantık.
 
+```text
+  Lojik Sembol:               Seri Anahtar Devresi (Fiziksel Karşılık):
+    A ──+---+
+        | & |─── Y = A . B      VCC ──[ / A ]──[ / B ]──( Motor )── GND
+    B ──+---+                         Kapak     Başlat
+                                (İkisi birden kapanmazsa akım geçmez)
+```
+
 ### Soru - Cevap
 > **Soru:** 3 girişli ($A, B, C$) bir AND kapısının doğruluk tablosunda kaç durum olur? Çıkışın $1$ olduğu kaç durum vardır ve girişler ne olmalıdır?  
 > **Öğrenci Cevabı:** $8$ farklı durum olur ve HIGH olan sadece $1$ durum olur, o da `1, 1, 1`.  
@@ -47,6 +55,14 @@ Bu doküman, mikrodenetleyicilerin işlemci (CPU) ve Aritmetik Mantık Biriminin
 
 - **Donanım Örneği:** Paralel bağlı anahtarlar; Yangın Sensörü ($1$) VEYA Manuel Yangın Butonu ($1$) tetiklendiğinde alarm sirenini ($1$) devreye sokan güvenlik devresi.
 
+```text
+  Lojik Sembol:               Paralel Anahtar Devresi (Fiziksel Karşılık):
+    A ──\---\                         +──[ / A (Yangın Sensörü) ]──+
+         |>=1|── Y = A + B      VCC ──+                             +──( Siren )── GND
+    B ──/---/                         +──[ / B (Manuel Buton)   ]──+
+                                      (En az biri kapanırsa siren çalar)
+```
+
 ### Soru - Cevap
 > **Soru:** 3 girişli bir OR kapısı için: 1) Çıkışın $0$ olduğu giriş kombinasyonu nedir? 2) Çıkışın $1$ olduğu toplam kaç durum vardır?  
 > **Öğrenci Cevabı:** 1) `000`, 2) 7 durumun hepsi 1.  
@@ -69,6 +85,12 @@ Bu doküman, mikrodenetleyicilerin işlemci (CPU) ve Aritmetik Mantık Biriminin
 
 - **Gömülü Sistemlerde "Active-LOW" Mantığı:**
   Bir pinin üzerinde çizgi varsa ($\overline{\text{RESET}}$, $\overline{\text{ENABLE}}$, $\overline{\text{CS}}$) veya `_N` eki taşıyorsa bu sinyal **LOW ($0\text{V}$)** seviyesinde aktiftir.
+
+```text
+  NOT (Evirici) Sembolü:          Active-HIGH vs. Active-LOW Sürücü Bağlantısı:
+    A ───|>o─── Y = !A              MCU (1 / 3.3V) ───────────> [ ENABLE  ] (Motor Çalışır)
+         (Baloncuk = Tersle)        MCU (0 / 0.0V) ──o[EN_N]──> [ /ENABLE ] (Motor Çalışır)
+```
 
 ### Soru - Cevap
 > **Soru:** Datasheet'inde $\overline{\text{ENABLE}}$ (Active-LOW) pini bulunan bir motor sürücüyü çalıştırmak için MCU'dan bu pine ne gönderilmelidir? Eğer normal `ENABLE` (Active-HIGH) olsaydı ne gönderilirdi?  
@@ -96,6 +118,17 @@ Bu doküman, mikrodenetleyicilerin işlemci (CPU) ve Aritmetik Mantık Biriminin
   2. **Parite ve Hata Denetimi (CRC):** UART vb. haberleşme hatlarında bit kontrolü için kullanılır.
   3. **Durum Değiştirme (NOT / Buffer Dönüşümü):** Bir girişi sabit tutulduğunda sinyali kontrol eder.
 
+```text
+  XOR Sembolü:                Sabit Girişle Davranış Dönüşümü:
+    A ──))--\                   A ──))--\
+         | =1|── Y = A ^ B           | =1|── !A   (B=1 ise NOT / Evirici olur)
+    B ──))--/                   1 ──))--/
+
+  Yarım Toplayıcı (Half Adder):
+    A ──+──[ XOR ]──> Toplam (Sum)    (1 + 1 -> Sum = 0, Carry = 1)
+    B ──+──[ AND ]──> Elde (Carry)
+```
+
 ### Soru - Cevap
 > **Soru:** 2 girişli bir XOR kapısının $B$ girişine sürekli HIGH ($1$) bağlanırsa:  
 > 1) $A=0$ iken çıkış ne olur?  
@@ -118,3 +151,11 @@ Gömülü C'de lojik kapılar iki farklı seviyede kullanılır: **Bit Düzeyind
 | **OR (VEYA)** | $Y = A + B$ | **`\|`** | **`\|\|`** | `PORTA \|= (1 << 3);` *(Bit 1 yapma)* / `if (a \|\| b)` |
 | **NOT (DEĞİL)** | $Y = \overline{A}$ | **`~`** | **`!`** | `maske = ~0x01;` *(Bitleri tersle)* / `if (!hazir)` |
 | **XOR (Özel VEYA)** | $Y = A \oplus B$ | **`^`** | **`!=`** *(0/1 için)* | `PORTA ^= (1 << 3);` *(Pin durumu değiştirme / Toggle)* |
+
+```mermaid
+flowchart TD
+    Q["C'de Lojik İşlem Amacın Ne?"] --> B["Donanım Register / Tekil Bit Değiştirme"]
+    Q --> L["if / while İçinde Karar Verme (Doğru-Yanlış)"]
+    B --> B1["Bitwise Operatörler: & | ~ ^"]
+    L --> L1["Mantıksal Operatörler: && || ! !="]
+```
