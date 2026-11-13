@@ -32,30 +32,34 @@ Her konu; detaylı teorik anlatımını, donanımsal mikrodenetleyici karşılı
 ## 🗺️ Müfredat Yol Haritası
 
 ```mermaid
-flowchart TD
-    subgraph S1["1. Aşama: Sayısal ve Elektriksel Temeller"]
+flowchart LR
+    subgraph S1["1. Aşama: Sayısal & Elektriksel"]
+        direction TB
         K1["1. Bit, Byte ve Sayı Sistemleri"] --> K2["2. Lojik Kapılar"]
-        K2 --> K3["3. Elektriksel Sinyaller (PWM / STEP)"]
+        K2 --> K3["3. Elektriksel Sinyaller"]
     end
 
-    subgraph S2["2. Aşama: Gömülü C ve MCU Mimarisi"]
-        K4["4. Programlama Temelleri (Gömülü C)"] --> K5["5. Algoritma Kurma (IPO / Akış)"]
-        K5 --> K6["6. Geliştirme Ortamları ve İS"]
-        K6 --> K7["7. Mikrodenetleyici Mimarisi (GPIO / Register)"]
+    subgraph S2["2. Aşama: Gömülü C & MCU"]
+        direction TB
+        K4["4. Programlama Temelleri (C)"] --> K5["5. Algoritma Kurma"]
+        K5 --> K6["6. Geliştirme Ortamları & İS"]
+        K6 --> K7["7. Mikrodenetleyici Mimarisi"]
     end
 
-    E1(["📝 1. Genel Değerlendirme Sınavı (1-7)"])
+    E1(["📝 1. Genel Sınav\n(Konu 1-7)"])
 
-    subgraph S3["3. Aşama: Haberleşme, Bellek ve Gerçek Zamanlılık"]
-        K8["8. Haberleşme Protokolleri (UART / I2C / SPI)"] --> K9["9. Pointer ve Struct"]
-        K9 --> K10["10. Interrupt (Kesme) ve volatile"]
-        K10 --> K11["11. Timer, PSC/ARR ve Donanımsal PWM"]
+    subgraph S3["3. Aşama: Haberleşme & Zamanlama"]
+        direction TB
+        K8["8. Haberleşme (UART/I2C/SPI)"] --> K9["9. Pointer ve Struct"]
+        K9 --> K10["10. Interrupt & volatile"]
+        K10 --> K11["11. Timer ve PWM"]
     end
 
-    E2(["📝 2. Genel Değerlendirme Sınavı (1-11)"])
+    E2(["📝 2. Genel Sınav\n(Konu 1-11)"])
 
-    subgraph S4["4. Aşama: Profesyonel Mühendislik Pratiği"]
-        K12["12. Debug (SWD) ve Datasheet / Register Okuma"]
+    subgraph S4["4. Aşama: Pratik"]
+        direction TB
+        K12["12. Debug & Datasheet"]
     end
 
     S1 --> S2 --> E1 --> S3 --> E2 --> S4
