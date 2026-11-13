@@ -19,6 +19,16 @@ Bu doküman; seri ve paralel haberleşme temellerini, senkron/asenkron iletişim
    - **Half-Duplex:** Çift yönlü fakat sırayla iletişim (Telsiz mantığı; Örn: I2C SDA hattı, RS-485).
    - **Full-Duplex:** Aynı anda hem gönderme hem alma yapılabilen iletişim (Örn: UART TX/RX, SPI MOSI/MISO).
 
+```text
+  Paralel (8 Hat - Kısa Mesafe):       Seri (1 Hat - Uzun Mesafe):
+  [MCU] ===(b0..b7 8 tel)===> [Cihaz]  [MCU] ---[b7][b6]...[b0]---> [Cihaz]
+
+  Dupleks Modları:
+  Simplex     : [A] ----------> [B]   (Tek yönlü)
+  Half-Duplex : [A] <---------> [B]   (Çift yönlü, aynı anda tek taraf konuşur)
+  Full-Duplex : [A] ===(TX/RX)===> [B] (Çift yönlü, aynı anda eşzamanlı)
+```
+
 ### Soru - Cevap
 > **Soru:**  
 > 1) $1\text{ metre}$ mesafedeki bir sensör ve pin sayısı kısıtlı bir MCU için neden paralel yerine seri haberleşme tercih edilir?  
@@ -43,6 +53,22 @@ Bu doküman; seri ve paralel haberleşme temellerini, senkron/asenkron iletişim
   - Örneğin $9600\text{ baud}$ hızında $1\text{ bit}$ süresi $T_{\text{bit}} = \frac{1}{9600} \approx 104.2\ \mu\text{s}$ iken, $115200\text{ baud}$ hızında $T_{\text{bit}} \approx 8.7\ \mu\text{s}$'dir.
   - Hızlar uyuşmazsa veya kablo kopup hat sürekli LOW kalırsa; alıcı, Stop bitinin olması gereken (10. adım) anda HIGH yerine LOW okur. Donanım paketin çerçevesinin bozulduğunu anlayarak **Framing Error** bayrağını kaldırır ve veriyi reddeder.
 
+```text
+  UART Çapraz Bağlantı (Cross-Over):
+  +--------+                +--------+
+  |  MCU   | TX --------> RX| Sensör |
+  |        | RX <-------- TX| / PC   |
+  |        | GND ------- GND|        |  <-- Ortak Referans Şart!
+  +--------+                +--------+
+
+  UART Paket Anatomisi (8N1 Frame — LSB First):
+  3.3V ────┐     ┌───┬───┬───┬───┬───┬───┬───┬───┬─────────
+  (HIGH)   │     │b0 │b1 │b2 │b3 │b4 │b5 │b6 │b7 │ Stop (1)
+  0.0V     └─────┴───┴───┴───┴───┴───┴───┴───┴───┘
+       Idle│Start│<-------- 8 Veri Biti -------->│Idle...
+            (0)   LSB                         MSB
+```
+
 ### Soru - Cevap ve Hata Analizi
 > **Soru:**  
 > 1) $TX \rightarrow TX$ ve $RX \rightarrow RX$ bağlanırsa neden haberleşme olmaz?  
@@ -66,6 +92,21 @@ Bu doküman; seri ve paralel haberleşme temellerini, senkron/asenkron iletişim
   - Cihazlar hatta asla aktif $3.3\text{V}$ basamaz; yalnızca hattı toprağa çekebilir (**LOW - $0\text{V}$**) veya serbest bırakır.
   - Hattın mantıksal $1$ (**HIGH - $3.3\text{V}$**) olabilmesi için SDA ve SCL hatlarına dışarıdan **Pull-Up dirençleri** (örn: $4.7\text{ k}\Omega$) bağlanması zorunludur.
 
+```text
+                     3.3V (VCC)
+                      |      |
+                   [4.7kΩ] [4.7kΩ]   <-- Harici Pull-Up Dirençleri (Zorunlu!)
+                      |      |
+  SDA (Veri) ---------+------+-------------+-------------+
+  SCL (Saat) ----------------+-------+-----+-------+-----+
+                                     |     |       |     |
+                                 +---+---+ |   +---+---+ |
+                                 |SCL SDA| |   |SCL SDA| |
+                                 | Master| |   |Slave 1| |
+                                 | (MCU) | |   |(0x3C) | | ... (0x68, 0x76)
+                                 +-------+ |   +-------+ |
+```
+
 ### Soru - Cevap
 > **Soru:** I2C devresinde harici Pull-Up dirençleri unutulursa neden haberleşme sağlanamaz?  
 > **Öğrenci Cevabı:** Pull-up direnci koymadığımız için Open-Drain yapıda hat asla $3.3\text{V}$ (HIGH) olamaz, bu da verilerin aktarılmamasına yol açar.  
@@ -82,6 +123,16 @@ Bu doküman; seri ve paralel haberleşme temellerini, senkron/asenkron iletişim
   - Son $1\text{ bit}$ ($b_0$ - R/W): **`0` = Yazma (Write)**, **`1` = Okuma (Read)**.
 - **ACK / NACK (9. Saat Darbesi):**
   - Her $8\text{ bitlik}$ paketten sonra 9. saat darbesinde alıcı cihaz SDA'yı **LOW** yaparsa **ACK (Onay / Cihaz Hatta Mevcut)**, hat **HIGH** kalırsa **NACK (Red / Cihaz Yok veya Hata)** anlamına gelir.
+
+```text
+  I2C Paket Çerçevesi:
+  +-------+------------------+-----+-----+----------+-----+-------+
+  | START | 7-Bit Adres      | R/W | ACK | 8-Bit    | ACK | STOP  |
+  |  (S)  | b7 b6 ... b1     | 0/1 | (0) | Veri     | (0) |  (P)  |
+  +-------+------------------+-----+-----+----------+-----+-------+
+  SCL=1 iken                                 9. Saat Darbesinde
+  SDA: 1->0                                  Alıcı SDA'yı 0'a çeker
+```
 
 ### Soru - Cevap ve Hata Analizi
 > **Soru:** $7\text{ bit}$ adresi `0x3C` olan ekrana Yazma (Write) yapmak için gönderilecek bayt nedir ve NACK gelirse ne anlama gelir?  
@@ -106,6 +157,22 @@ Bu doküman; seri ve paralel haberleşme temellerini, senkron/asenkron iletişim
   4. **CS / SS (Chip Select):** Her sensör için **ayrı (bağımsız)** çekilen seçim hattıdır. **Active-LOW** çalışır; Master hangi sensörle konuşacaksa yalnızca onun CS pinini **LOW ($0\text{V}$)** yapar, diğer tüm sensörlerin CS pinlerini **HIGH ($3.3\text{V}$)** tutar.
 - **Shift Register Mimarisi:** Master ve Slave içindeki $8\text{ bitlik}$ kaydırmalı yazmaçlar halka şeklinde çalışır; her saat darbesinde 1 bit gönderilirken aynı anda 1 bit alınır. Adresleme baytı ve ACK/NACK beklemesi olmadığı için çok hızlıdır.
 
+```text
+  SPI Donanım Bağlantısı (3 Ortak + N Adet CS):
+  +----------+                    +----------+  +----------+
+  |  Master  | SCK  ------------->| SCK      |  | SCK      |
+  |  (MCU)   | MOSI ------------->| MOSI     |  | MOSI     |
+  |          | MISO <-------------| MISO     |  | MISO     |
+  |          | CS1  ---(LOW)----->| /CS (Aktif) |          |
+  |          | CS2  ---(HIGH)-------------------| /CS (Sus)|
+  +----------+                    +----------+  +----------+
+
+  8-Bit Halka Shift Register (Eşzamanlı Full-Duplex Veri Takası):
+  Master [b7 b6 ... b0] ──(MOSI)──> Slave [b7 b6 ... b0]
+     ^                                      |
+     └────────────────(MISO)────────────────┘
+```
+
 ### Soru - Cevap ve Hata Analizi
 > **Soru:** 5 adet SPI sensör için kaç pin gerekir ve boştayken CS pinleri hangi seviyede tutulur?  
 > **Öğrenci İlk Yanıtı:** 1) Paralel bağlanacağı için 4 pin. 2) HIGH olur, çünkü haberleşmek istediği zaman CS'i LOW'a çeker.  
@@ -125,6 +192,14 @@ Bu doküman; seri ve paralel haberleşme temellerini, senkron/asenkron iletişim
 | **Hız** | Düşük / Orta | Orta ($100-400\text{ kHz}$) | Çok Yüksek ($10-80\text{ MHz}$) |
 | **Çıkış Yapısı** | Push-Pull | Open-Drain (Pull-Up Şart) | Push-Pull |
 | **Çoklu Cihaz Seçimi** | Yok (Birebir / 1-to-1) | Yazılımsal ($7\text{-bit}$ Adres) | Donanımsal (Her cihaza ayrı $CS$ pini) |
+
+```mermaid
+flowchart TD
+    Q1{"Haberleşme İhtiyacı Nedir?"}
+    Q1 -- "Çok Yüksek Hız\n(Ekran, SD Kart, Flash)" --> SPI["SPI Seç (10-80 MHz, 3+N Pin)"]
+    Q1 -- "Çok Sayıda Yavaş Sensör\n(Pin Sayısı Kısıtlı)" --> I2C["I2C Seç (2 Pin, 7-bit Adres)"]
+    Q1 -- "PC Loglama / GPS / Bluetooth\n(Birebir, Saat Hattı Yok)" --> UART["UART Seç (TX/RX + GND)"]
+```
 
 ### Final Senaryo Sorusu ve Mühendislik Gerekçeleri
 > **Senaryo Eşleştirmesi:**  

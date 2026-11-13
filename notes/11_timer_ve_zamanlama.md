@@ -16,6 +16,18 @@ Bu doküman; Bloklayan (`delay`) ile Bloklamayan (`millis` / `HAL_GetTick`) kod 
   ```
   İşlemci hiç bekleme yapmaz; süre dolmadıysa `if` bloğunu transit geçerek diğer görevleri yürütmeye devam eder.
 
+```text
+  Bloklayan Kod (delay_ms):
+  Zaman:  0ms         500ms        1000ms       1500ms       2000ms
+  CPU  :  [######### CPU KİLİTLİ (delay_ms) #########][Sensör][Ekran]...
+          (Bu sırada buton ve sensörler tamamen cevapsızdır!)
+
+  Bloklamayan Kod (millis / HAL_GetTick):
+  Zaman:  0ms         500ms        1000ms       1500ms       2000ms
+  CPU  :  [Buton][Sensör][Buton][Sensör][Buton][Ekran][Buton][Sensör]...
+          (Her milisaniyede tüm görevler akıcı şekilde yürütülür!)
+```
+
 ### Soru - Cevap
 > **Soru:**  
 > 1) Hasta başı monitöründe ekranı güncellemek için `delay_ms(2000)` kullanılırsa kalp atış sensörü ve tuşlara ne olur?  
@@ -36,6 +48,21 @@ Donanımsal Timer, CPU'dan bağımsız olarak arka planda kendi kendine sayan do
 3. **ARR (Auto-Reload Register - Tavan / Periyot):** Sayacın kaça kadar sayıp sıfırlanacağını (Overflow / Taşma) ve ne sıklıkla Timer Kesmesi (Interrupt) üreteceğini belirler.
    *(Not: Donanım $0$'dan saymaya başladığı için yazmaçlara değerler `PSC - 1` ve `ARR - 1` olarak yazılır).*
 
+```text
+  Donanımsal Timer Blok Şeması:
+  [f_clock: 72 MHz] ---> [/ PSC (72.000)] ---> [1 kHz (1 ms)] ---> [CNT: 0, 1, 2...ARR]
+                                                                          |
+                                                   CNT == ARR olunca <----+
+                                                   (Sıfırlanır + Overflow Kesmesi Üretir)
+
+  Sayıcı (CNT) Testere Dişi Grafiği:
+  ARR (500) - - - - - - /| - - - - - - /| - - - - - - /|
+                       / |            / |            / |
+    0       ──────────/  ▼───────────/  ▼───────────/  ▼──> Zaman
+                      500 ms         1000 ms       1500 ms
+                      (IRQ!)         (IRQ!)        (IRQ!)
+```
+
 ### Soru - Cevap
 > **Soru:** $72\text{ MHz}$ ($72\,000\,000\text{ Hz}$) ana saati `PSC` ile $72\,000$'e bölersek `CNT` kaç $\text{Hz}$ (kaç $\text{ms}$) ile sayar ve her $500\text{ ms}$'de bir kesme üretmek için `ARR` kaç yapılmalıdır?  
 > **Öğrenci Cevabı:**  
@@ -52,6 +79,20 @@ Timer donanımı, **`ARR` (Periyot Tavanı)** ve **`CCR` (Capture/Compare Regist
 - **`CNT >= CCR` iken:** Pin çıkışı **LOW ($0\text{V}$)** çekilir.
 - **Görev Oranı (Duty Cycle) Formülü:**
   $$\text{Duty Cycle (\%)} = \frac{\text{CCR}}{\text{ARR}} \times 100 \quad \Longleftrightarrow \quad \text{CCR} = \text{ARR} \times \frac{\text{Yüzde}}{100}$$
+
+```text
+  CNT Sayacı ile Donanımsal PWM Oluşumu (Örn: ARR = 1000, CCR = 750 -> %75 Duty):
+  ARR (1000) - - - - - - - /| - - - - - - - /|
+  CCR (750)  - - - - - /|  | - - - - - /|  |
+                      / |  |          / |  |
+    0        ────────/  |  ▼─────────/  |  ▼────> Zaman
+                        |  |            |  |
+  PWM Çıkış Pini:       |  |            |  |
+  3.3V (HIGH) ███████████  ┌█████████████  ┌──   (CNT < CCR iken HIGH)
+  0.0V (LOW)  ──────────┴──┴────────────┴──┴──   (CNT >= CCR iken LOW)
+                        |<->|
+                        %25 LOW
+```
 
 ### Soru - Cevap ve Hata Analizi
 > **Soru:** `ARR = 1000` iken $\%50$ ve $\%75$ Duty Cycle için hangi yazmaç kaça ayarlanmalıdır?  

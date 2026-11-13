@@ -17,6 +17,19 @@ Bu doküman; RAM bellek adresleme mantığını, Pointer (`&` ve `*`) operatörl
   - `ptr` (yıldızsız) $\rightarrow$ **Adresin kendisini** (`0x20000010` gibi kapı numarasını) verir.
   - `*ptr` (yıldızlı) $\rightarrow$ O adresteki kutunun **içindeki değeri** (`150` gibi veriyi) verir.
 
+```text
+  RAM Adresi       Değişken       İçerik (Değer)
+  +------------+   +--------+     +-------------------+
+  | 0x20000004 |   | p_hiz  | --> | 0x20000010        |  <-- p_hiz (Adres tutar)
+  +------------+   +--------+     +---------+---------+
+                                            |
+                                            | *p_hiz = 150; (Adrese git, değeri değiştir!)
+                                            v
+  +------------+   +--------+     +-------------------+
+  | 0x20000010 |   |  hiz   |     |  100  --->  150   |  <-- *p_hiz (İçerdeki değer)
+  +------------+   +--------+     +-------------------+
+```
+
 ### Soru - Cevap ve Hata Analizi
 > **Soru:**  
 > ```c
@@ -41,6 +54,15 @@ Bu doküman; RAM bellek adresleme mantığını, Pointer (`&` ve `*`) operatörl
    - **Call by Reference (Adresle Çağırma):** Fonksiyona değişkenin adresi gönderilirse (`fonk(&x)`), fonksiyon doğrudan adrese gidip **orijinal değişkeni** günceller ve büyük verileri kopyalamadığı için RAM tasarrufu sağlar.
 2. **Doğrudan Donanım Yazmaçlarına (Registers) Erişim:**
    - Mikrodenetleyicinin çevre birimleri (GPIO, UART, Timer) sabit bellek adreslerindedir (Örn: `0x40020014`). C dilinde bu fiziksel adreslere doğrudan veri yazmanın tek yolu Pointer kullanmaktır.
+
+```text
+  Call by Value: fonk(x)                Call by Reference: fonk(&x)
+  +--------+                            +--------+
+  | main x | (0) -- Kopya --> [kopya=25]| main x | (0 -> 25)
+  +--------+                  (Değişir) +--------+     ^
+  Orijinal x = 0 kalır!                     ^          | (*ptr = 25)
+                                            +-- ptr ---+ (Adresi üzerinden günceller)
+```
 
 ### Soru - Cevap
 > **Soru:**  
@@ -69,6 +91,16 @@ Bu doküman; RAM bellek adresleme mantığını, Pointer (`&` ve `*`) operatörl
   ana_batarya.sarj_yuzdesi = 85;
   ```
 
+```text
+  Batarya_t Struct Paket Yapısı (Farklı Tipler Tek Çatı Altında):
+  +-----------------------+--------------------+--------------------+
+  | voltaj_mV (uint16_t)  | sicaklik_C (uint8) | sarj_yuzdesi (u8)  |
+  |        2 Bayt         |       1 Bayt       |       1 Bayt       |
+  +-----------------------+--------------------+--------------------+
+  ^
+  └── ana_batarya.sarj_yuzdesi = 85;  (Değişkenin kendisi -> Nokta '.')
+```
+
 ### Soru - Cevap
 > **Soru:**  
 > 1) `Batarya_t` kalıbından `ana_batarya` oluşturup `sarj_yuzdesi` değerini `85` yapan kod nedir?  
@@ -89,6 +121,17 @@ Bu doküman; RAM bellek adresleme mantığını, Pointer (`&` ve `*`) operatörl
 - **Donanım Karşılığı (`GPIOA->ODR` Sırrı):**
   - STM32 gibi mikrodenetleyicilerde her donanım biriminin yazmaçları (`MODER`, `IDR`, `ODR`) bir `struct` olarak modellenmiştir.
   - `GPIOA` veya `USART1` ifadeleri, o donanımın fiziksel başlangıç adresini tutan birer **Struct Pointer**'dır. Bu yüzden donanım yazmaçlarına erişirken daima `->` operatörü (`GPIOA->ODR |= (1 << 5);`) kullanılır.
+
+```text
+  GPIOA (0x4002 0000 Başlangıç Adresini Tutan Struct Pointer):
+  +-----------------------------------------------------------+
+  | GPIOA -> [ 0x4002 0000 ] MODER  (Mod Yazmacı)             |
+  |          [ 0x4002 0004 ] OTYPER (Push-Pull / Open-Drain)  |
+  |          ...                                              |
+  |          [ 0x4002 0010 ] IDR    (Giriş Veri Yazmacı)      |
+  |          [ 0x4002 0014 ] ODR    (Çıkış Veri Yazmacı) <---- GPIOA->ODR |= (1 << 5);
+  +-----------------------------------------------------------+
+```
 
 ### Soru - Cevap
 > **Soru:**  

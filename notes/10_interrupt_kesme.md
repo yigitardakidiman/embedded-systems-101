@@ -11,6 +11,31 @@ Bu doküman; Polling (Sürekli Yoklama) ile Interrupt (Donanımsal Kesme) farkı
 - **Interrupt (Donanımsal Kesme):** Harici bir pin (EXTI), zamanlayıcı (Timer) veya haberleşme birimi (UART/SPI/I2C) üzerinde bir olay gerçekleştiğinde, donanımın (NVIC) işlemciyi anında uyarmasıdır.
   - İşlemci elindeki işi (`main`) geçici olarak dondurur, **ISR (Kesme Fonksiyonu)** içine gidip acil görevi yapar ve `main` içinde tam kaldığı satırdan çalışmaya devam eder.
 
+```text
+  Polling (Sürekli Yoklama):
+  main: [Ekran Çizimi (300ms) ........] -> [Buton Oku]  (Anlık sinyal bu arada KAÇTI!)
+
+  Interrupt (Donanımsal Kesme):
+  main: [Ekran Çizimi...] --(Kesme!)--+               +--> [Ekran Çizimi Devam...]
+                                      |               |
+  ISR :                               +-> [Acil Görev]+
+```
+
+```mermaid
+sequenceDiagram
+    participant HW as Donanım (EXTI / Timer)
+    participant CPU as Ana Program (main)
+    participant ISR as Kesme Fonksiyonu (ISR)
+
+    Note over CPU: Normal while(1) akışı çalışıyor
+    HW->>CPU: Kesme Sinyali (IRQ)!
+    CPU->>CPU: Mevcut adresi Stack'e kaydet (Dondur)
+    CPU->>ISR: ISR içine atla
+    ISR->>ISR: Acil müdahale + bayrak = 1
+    ISR-->>CPU: Kesmeden dön (RETI)
+    Note over CPU: Kaldığı satırdan devam eder
+```
+
 ### Soru - Cevap
 > **Soru:** Bir endüstriyel pres makinesinde Lazer Güvenlik Sensörü ile Sıcaklık Göstergesi görevlerinden hangisi Interrupt, hangisi Polling ile yapılmalıdır?  
 > **Öğrenci Cevabı:** Lazer için Interrupt yapmak daha iyi olur çünkü acil bir durumda hemen durması gerekir. Sıcaklık için Polling yapmak yeterli olacaktır.  
@@ -26,6 +51,20 @@ Kesme oluştuğunda donanımın otomatik olarak çağırdığı özel fonksiyona
 1. **Çok Kısa ve Hızlı Olmalıdır:** ISR çalışırken ana döngü (`main`) ve düşük öncelikli kesmeler durur.
 2. **ISR İçinde ASLA `delay` Kullanılmaz:** ISR içinde bekleme yapmak tüm mikrodenetleyiciyi o süre boyunca kilitler (felç eder).
 3. **Bayrak (Flag) Mimarisi Kullanılır:** ISR içinde yalnızca acil donanım müdahalesi yapılır ve bir bayrak değişkeni (`bayrak = 1;`) kaldırılır. Uzun süren işlemler (ekran güncelleme, SMS/Wi-Fi gönderimi) `main` döngüsü içinde bu bayrak kontrol edilerek yürütülür.
+
+```mermaid
+flowchart LR
+    subgraph ISR_BOX["ISR (Mikrosaniyeler — Hızlı & Kısa)"]
+        I1["Acil Donanım Müdahalesi\n(Örn: Motoru Durdur)"] --> I2["bayrak = 1;"]
+    end
+
+    subgraph MAIN_BOX["main() while(1) Döngüsü (Uzun İşler)"]
+        M1{"if (bayrak == 1)"} -- "Evet" --> M2["Ekran Güncelle / Wi-Fi Gönder"]
+        M2 --> M3["bayrak = 0;"]
+    end
+
+    I2 -. "Paylaşılan volatile bayrak" .-> M1
+```
 
 ### Soru - Cevap
 > **Soru:**  
@@ -46,6 +85,15 @@ Kesme oluştuğunda donanımın otomatik olarak çağırdığı özel fonksiyona
   volatile uint8_t veri_geldi_mi = 0;
   ```
   Derleyiciye: *"Bu değişken senin haberin olmadan donanım veya ISR tarafından her an değiştirilebilir; bunu önbelleğe alma, her seferinde doğrudan gerçek RAM adresinden oku!"* emrini verir.
+
+```text
+  volatile YOKSA (Optimizasyon Tuzağı):
+    ISR  ---> [ RAM: bayrak = 1 ]          main() ---> [ CPU Register: 0 ] (Kördür!)
+                                                        (RAM'e hiç bakmaz!)
+
+  volatile VARSA (Doğru Davranış):
+    ISR  ---> [ RAM: bayrak = 1 ] <====== Her döngüde RAM'den okur ====== main()
+```
 - **Temel Kesme Kaynakları:**
   1. **EXTI (Harici Pin Kesmesi):** Acil stop butonları, çarpışma sensörleri, enkoderler.
   2. **Haberleşme Kesmeleri (UART/I2C/SPI RX):** Veri paketi geldiği anda işlemciyi uyandırıp veriyi tampona alma.
