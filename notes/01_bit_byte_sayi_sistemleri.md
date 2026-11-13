@@ -124,11 +124,11 @@ Yöntem 1: Ağırlık Çıkarma (26 için)       Yöntem 2: 2'ye Sürekli Bölme
 ```
 
 ### Soru - Cevap
-> **Soru:** $A = \text{`1011 0010`}$, $B = \text{`1100 0011`}$ için:  
-> 1) $A \ \& \ B = ?$  
-> 2) $A \ | \ B = ?$  
+> **Soru:** $A =$ `1011 0010`, $B =$ `1100 0011` için:  
+> 1) `A & B = ?`  
+> 2) `A | B = ?`  
 > **Öğrenci Yanıtı:** 1. Cevap: 130 (`1000 0010`), 2. Cevap: 113.  
-> **Rehberlik / Hata Analizi:** 1. cevap doğru ($128 + 2 = 130$). 2. soruda ise öğrenci `1 | 1` durumlarını yanlışlıkla `0` alarak farkında olmadan XOR sonucunu bulmuştu. OR kuralı ($1 \ | \ 1 = 1$) tekrar hatırlatıldı.  
+> **Rehberlik / Hata Analizi:** 1. cevap doğru ($128 + 2 = 130$). 2. soruda ise öğrenci `1 | 1` durumlarını yanlışlıkla `0` alarak farkında olmadan XOR sonucunu bulmuştu. OR kuralı (`1 | 1 = 1`) tekrar hatırlatıldı.  
 > **Öğrenci Düzeltmesi:** **243** (`1111 0011` $\rightarrow 128 + 64 + 32 + 16 + 2 + 1$).  
 > **Değerlendirme:** Doğru.
 
@@ -151,7 +151,7 @@ Yöntem 1: Ağırlık Çıkarma (26 için)       Yöntem 2: 2'ye Sürekli Bölme
 ```
 
 ### Soru - Cevap
-> **Soru:** $A = \text{`1010 1100`}$, $B = \text{`0000 1111`}$ için:  
+> **Soru:** $A =$ `1010 1100`, $B =$ `0000 1111` için:  
 > 1) $A \oplus B = ?$  
 > 2) $\sim A = ?$  
 > **Öğrenci Cevabı:** 1) `1010 0011`, 2) `0101 0011`.  
@@ -181,9 +181,84 @@ Yöntem 1: Ağırlık Çıkarma (26 için)       Yöntem 2: 2'ye Sürekli Bölme
 ### Soru - Cevap
 > **Soru:**  
 > 1) `(1 << 5)` ifadesinin 8 bitlik binary karşılığı nedir?  
-> 2) $X = \text{`0b0100 1000`}$ ($72$) ise $X \gg 3$ binary ve onluk değeri nedir?  
+> 2) $X =$ `0b0100 1000` ($72$) ise $X \gg 3$ binary ve onluk değeri nedir?  
 > **Öğrenci Cevabı:** 1) `0010 0000`, 2) `0000 1001` (Onluk karşılığı: 9).  
 > **Değerlendirme:** Doğru.
+
+---
+
+## 1.8 Pratik Uygulama: 16-Bitlik Verileri Baytlara Ayırma ve Birleştirme (Maskeleme ve `0xFF`)
+
+Haberleşme protokollerinde (UART, SPI, I2C) veya 8-bit donanım yazmaçlarında veriler genellikle **1 bayt (8 bit)** genişliğindeki paketler halinde iletilir. $255$'ten büyük (örneğin $256$ veya $300$ gibi) bir sayıyı göndermek için 16-bitlik veri **2 bayta bölünür** ve alıcı tarafta tekrar **birleştirilir**.
+
+### 16-Bit Verinin Kutularla Yapısı
+16 bitlik bir sayı yan yana duran iki adet 8 bitlik "kutudan" oluşur:
+```text
+                  16-bit Veri (uint16_t)
+        [      Sol Kutu (MSB)      ] [      Sağ Kutu (LSB)      ]
+Bit:     15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0
+```
+
+### 1. Parçalama (Verici Tarafı)
+
+Örnek olarak **300** sayısını (`0x012C`) ele alalım:
+- İkili (Binary) Gösterim: `[0000 0001] [0010 1100]`
+
+#### A) Sol Kutunun (Üst Bayt / MSB) Alınması (`>> 8`):
+Veriyi 8 bit sağa kaydırarak sol kutudaki bitleri sağ kutunun yerine indiririz:
+```text
+  Başlangıç (300)          :  [0000 0001] [0010 1100]
+  8 bit sağa kaydır (>> 8) :  [0000 0000] [0000 0001]  --> Değer: 1 (0x01)
+```
+
+#### B) Sağ Kutunun (Alt Bayt / LSB) Alınması ve `0xFF` Maskesi:
+Sadece sağ kutudaki 8 biti almak, sol kutudaki fazlalıkları silmek için `0xFF` (`1111 1111`) ile **AND (`&`)** işlemi yapılır:
+```text
+    Sayı (300)       :  0000 0001  0010 1100
+  & Maske (0x00FF)   :  0000 0000  1111 1111  <-- Sol taraf 0, sağ taraf 1
+  ------------------------------------------
+    Sonuç            :  0000 0000  0010 1100  --> Değer: 44 (0x2C)
+```
+
+> **📌 Neden `0xFF` kullandık?**  
+> `0xFF` onaltılık tabanda `1111 1111` (8 adet 1) demektir. AND (`&`) mantığında:
+> - `bit & 1 = bit` (değeri aynen korur).
+> - `bit & 0 = 0` (değeri sıfırlayıp siler).  
+> Sol kutu `0` ile çarpılmış gibi sıfırlanır, sağ kutu ise `1` ile süzülerek aynen kalır.
+
+---
+
+### 2. Birleştirme (Alıcı Tarafı - `<< 8` ve `|`)
+
+Alıcı taraf bu iki ayrı baytı sırasıyla aldığında:
+- `ust_bayt = 1`
+- `alt_bayt = 44`
+
+Eski 16-bitlik sayıyı tekrar elde etmek için:
+1. Üst bayt eski yerine gelmesi için 8 bit sola kaydırılır: `ust_bayt << 8` $\rightarrow$ `0000 0001 0000 0000` (256)
+2. Alt bayt ile VEYA (`|`) işlemine sokulur:
+```text
+    (1 << 8)     :  0000 0001  0000 0000   (256)
+  | alt_bayt (44):  0000 0000  0010 1100   (44)
+  --------------------------------------
+    Toplam Sayı  :  0000 0001  0010 1100   (300)
+```
+
+---
+
+### C Kod Kalıbı
+
+```c
+#include <stdint.h>
+
+// 1. Gönderici Tarafında Parçalama
+uint16_t sayi = 300;
+uint8_t msb = sayi >> 8;        // Sol kutuyu aldık -> 1
+uint8_t lsb = sayi & 0xFF;      // Sağ kutuyu maskeleyip aldık -> 44
+
+// 2. Alıcı Tarafında Birleştirme
+uint16_t kurtarilan_sayi = ((uint16_t)msb << 8) | lsb; // Sonuç: 300
+```
 
 ---
 

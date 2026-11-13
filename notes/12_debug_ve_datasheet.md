@@ -137,5 +137,5 @@ Reference Manual'deki yazmaç tablolarında 4 temel unsur yer alır:
    - **Hata Analizi ve Rehberlik:**
      - $\text{Fiziksel Adres} = \text{Base} (0x4001\,2400) + \text{Offset} (0x08)$ formülü hatırlatıldı.
      - `Reset Değeri: 0x0000 0000` olduğu için başlangıçta `ADON = 0` olduğu gösterildi.
-     - Biti `1` yapmak için OR ($X \mid 1 = 1$), `0` yapmak için AND ($X \ \& \ 0 = 0$) olduğu hatırlatıldı.
+      - Biti `1` yapmak için OR (`X | 1 = 1`), `0` yapmak için AND (`X & 0 = 0`) olduğu hatırlatıldı.
    - **Öğrenci Düzeltmesi:** 1) `0x4001 2408`, 2) Kapalıdır, 3) `|=` (VEYA) operatörü kullanılmalıdır. *(Tam puan - Tam öğrenme doğrulandı)*
