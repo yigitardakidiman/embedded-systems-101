@@ -35,7 +35,7 @@ flowchart LR
 ---
 
 ## 1. Soru: Sayı Sistemleri, Bit Maskeleme ve Lojik Kapılar
-- **Senaryo:** Kontrol yazmacı başlangıç değeri `SYS_CTRL = 0x35`. Lazer tüpü ateşleme şartları: "Kapak Kapalı ($A=1$)" VE "Soğutma Suyu Normal ($B=1$)". Lazer sürücü pini Active-LOW ($\overline{\text{LASER\_EN}}$).
+- **Senaryo:** Kontrol yazmacı başlangıç değeri `SYS_CTRL = 0x35`. Lazer tüpü ateşleme şartları: "Kapak Kapalı ($A=1$)" VE "Soğutma Suyu Normal ($B=1$)". Lazer sürücü pini Active-LOW (`/LASER_EN`).
 - **Soru:**
   1. `0x35` binary karşılığı ve HIGH olan bitler?
   2. Bit 3'ü Set (`1`), Bit 4'ü Clear (`0`) yapacak C maskeleme ifadeleri?

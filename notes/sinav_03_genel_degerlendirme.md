@@ -36,7 +36,7 @@ flowchart TD
 ---
 
 ## 1. Soru: Sayı Sistemleri, Lojik Kapılar ve Bit Maskeleme (Konu 1 & 2)
-- **Senaryo:** `DRONE_STATUS = 0x96`. Motor izin şartı: Kumanda ($A=1$) VE Kilit Açık ($B=1$). Motor sürücü pini: Active-LOW ($\overline{\text{MOTOR\_EN}}$).
+- **Senaryo:** `DRONE_STATUS = 0x96`. Motor izin şartı: Kumanda ($A=1$) VE Kilit Açık ($B=1$). Motor sürücü pini: Active-LOW (`/MOTOR_EN`).
 - **Soru:**
   1. `0x96` binary karşılığı ve HIGH olan bitler?
   2. Bit 0'ı Set (`1`), Bit 7'yi Clear (`0`) yapacak C ifadeleri?
