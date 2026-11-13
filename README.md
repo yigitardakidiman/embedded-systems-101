@@ -29,16 +29,59 @@ Her konu; detaylı teorik anlatımını, donanımsal mikrodenetleyici karşılı
 
 ---
 
+## 🗺️ Müfredat Yol Haritası
+
+```mermaid
+flowchart TD
+    subgraph S1["1. Aşama: Sayısal ve Elektriksel Temeller"]
+        K1["1. Bit, Byte ve Sayı Sistemleri"] --> K2["2. Lojik Kapılar"]
+        K2 --> K3["3. Elektriksel Sinyaller (PWM / STEP)"]
+    end
+
+    subgraph S2["2. Aşama: Gömülü C ve MCU Mimarisi"]
+        K4["4. Programlama Temelleri (Gömülü C)"] --> K5["5. Algoritma Kurma (IPO / Akış)"]
+        K5 --> K6["6. Geliştirme Ortamları ve İS"]
+        K6 --> K7["7. Mikrodenetleyici Mimarisi (GPIO / Register)"]
+    end
+
+    E1(["📝 1. Genel Değerlendirme Sınavı (1-7)"])
+
+    subgraph S3["3. Aşama: Haberleşme, Bellek ve Gerçek Zamanlılık"]
+        K8["8. Haberleşme Protokolleri (UART / I2C / SPI)"] --> K9["9. Pointer ve Struct"]
+        K9 --> K10["10. Interrupt (Kesme) ve volatile"]
+        K10 --> K11["11. Timer, PSC/ARR ve Donanımsal PWM"]
+    end
+
+    E2(["📝 2. Genel Değerlendirme Sınavı (1-11)"])
+
+    subgraph S4["4. Aşama: Profesyonel Mühendislik Pratiği"]
+        K12["12. Debug (SWD) ve Datasheet / Register Okuma"]
+    end
+
+    S1 --> S2 --> E1 --> S3 --> E2 --> S4
+```
+
+---
+
 ## 🗂️ Dizin Yapısı
 
 ```text
 embedded101/
-├── agent.md                          # Eğitmen kuralları ve eğitim metodolojisi
-├── README.md                         # Ana gösterge paneli ve müfredat haritası
-└── notes/                            # Konu bazlı modüler ders notları ve soru-cevaplar
+├── agent.md                              # Eğitmen kuralları ve eğitim metodolojisi
+├── README.md                             # Ana gösterge paneli ve müfredat haritası
+└── notes/                                # Konu bazlı modüler ders notları ve soru-cevaplar
     ├── 01_bit_byte_sayi_sistemleri.md
     ├── 02_lojik_kapilar.md
     ├── 03_elektriksel_sinyaller.md
     ├── 04_programlama_temelleri.md
-    └── ... (ilerledikçe eklenecekler)
+    ├── 05_algoritma_kurma.md
+    ├── 06_gelistirme_ortamlari.md
+    ├── 07_mikrodenetleyici_mimarisi.md
+    ├── sinav_01_genel_degerlendirme.md
+    ├── 08_haberlesme_protokolleri.md
+    ├── 09_pointer_ve_struct.md
+    ├── 10_interrupt_kesme.md
+    ├── 11_timer_ve_zamanlama.md
+    ├── sinav_02_genel_degerlendirme.md
+    └── 12_debug_ve_datasheet.md
 ```
