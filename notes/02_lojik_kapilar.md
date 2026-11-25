@@ -75,7 +75,8 @@ Bu doküman, mikrodenetleyicilerin işlemci (CPU) ve Aritmetik Mantık Biriminin
 - Tek girişli ve tek çıkışlıdır ($Y = \overline{A}$).
 - Girişi tersler: $0 \rightarrow 1$, $1 \rightarrow 0$.
 - **C Dilindeki Sembolleri:**
-  - **Bit Düzeyinde (Bitwise) NOT (`~`):** Bir verinin tüm bitlerini tek tek tersler (`Y = ~A;`). Örneğin `~0b00001111` $\rightarrow$ `0b11110000`.
+  - **Bit Düzeyinde (Bitwise) NOT (`~`):** Bir verinin tüm bitlerini tek tek tersler (`Y = ~A;`). 8 bitlik gösterimde `0b00001111` ($0\text{x}0\text{F}$) terslendiğinde alt 8 bit `0b11110000` ($0\text{xF}0$) olur.
+    > **⚠️ Gömülü C Uyarısı (Integer Promotion):** C dilinde `uint8_t` türündeki bir değişkene `~` uygulandığında değer önce 32 bitlik `int` türüne yükseltilir (`0x0000000F` $\rightarrow$ `~` $\rightarrow$ `0xFFFFFFF0`). Bu nedenle bir `if` karşılaştırmasında yalnızca alt 8 biti kontrol etmek için **`if ((uint8_t)~A == 0xF0)`** (tür dönüşümü) veya **`if ((~A & 0xFF) == 0xF0)`** (bit maskeleme) kullanılmalıdır.
   - **Mantıksal (Koşul) NOT (`!`):** Bir koşulun doğruluk değerini tersler (`if (!buton_basili)` $\rightarrow$ `0` ise `1`, sıfırdan farklıysa `0` yapar).
 
 | Giriş A | Çıkış Y (`~A` / `!A`) |

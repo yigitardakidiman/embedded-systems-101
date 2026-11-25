@@ -17,6 +17,7 @@ Hedef: Haftaya yapılacak sınava kadar 1–12. konuları tekrar etmek ve aşağ
 4. Hesap sorularında öğrenciden ara adımlar da istenir (birim, `-1` kuralı, yazmaç genişliği).
 5. Önceki kayıtlarda "doğru" sayılmış ama aslında hatalı olan cevaplar kayıttan **sessizce silinmez**. Altına `> **Düzeltme (Tekrar Oturumu):** ...` notu eklenir.
 6. Her oturumun kaydı `notes/tekrar_sinav_hazirlik.md` dosyasına eklenir. İçeriği: tarih, sorular, cevaplar, hata analizi, hâlâ zayıf olan noktalar.
+7. Bir eksik kapatıldığında, `notes/` altındaki ilgili ana konu dosyaları (`01_...` – `12_...`) da sonradan açılıp bakılabilecek **eksiksiz ve düzenli bir başvuru kaynağı** olacak şekilde o konunun teorik/pratik açıklamasıyla güncellenir.
 
 ### Bilinen eksikler (öncelik sırasıyla)
 | # | Konu | Eksik | İlgili dosya |

@@ -262,9 +262,9 @@ uint16_t kurtarilan_sayi = ((uint16_t)msb << 8) | lsb; // Sonuç: 300
 
 ---
 
-## 1.9 Kritik Gömülü C Tuzakları (Tekrar Oturumu Eklemeleri — E1 & E6)
+## 1.9 Kritik Gömülü C Tuzakları: Bit Sıfırlama ve Integer Promotion
 
-### 1. Bit Sıfırlamada `~` Unutma Tuzağı (E1)
+### 1. Bit Sıfırlamada `~` Unutma Tuzağı
 Bir yazmaçtaki yalnızca $n$. biti sıfırlamak (`0` yapmak) ve diğer 7 biti olduğu gibi korumak için maskenin mutlaka **`~` (NOT)** ile terslenmesi gerekir:
 
 - **Doğru Kullanım (`&= ~`):**
@@ -279,7 +279,7 @@ Bir yazmaçtaki yalnızca $n$. biti sıfırlamak (`0` yapmak) ve diğer 7 biti o
 
 ---
 
-### 2. `~` Operatörü ve Tamsayı Yükseltme (*Integer Promotion*) Tuzağı (E6)
+### 2. `~` Operatörü ve Tamsayı Yükseltme (*Integer Promotion*) Tuzağı
 C dilinde `uint8_t` veya `uint16_t` gibi `int` türünden daha dar değişkenler, `~` (bitwise NOT) gibi bit işlemine girmeden önce otomatik olarak **`int` (32 bitlik sistemde 32 bit)** türüne genişletilir (*integer promotion*).
 
 ```c
