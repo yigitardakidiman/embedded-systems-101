@@ -21,12 +21,12 @@ Hedef: Haftaya yapılacak sınava kadar 1–12. konuları tekrar etmek ve aşağ
 ### Bilinen eksikler (öncelik sırasıyla)
 | # | Konu | Eksik | İlgili dosya |
 |---|---|---|---|
-| E1 | Bit işlemleri | Bit sıfırlamada `~` unutuluyor: doğrusu `x &= ~(1 << n)`. `sinav_03` 1.2'de yanlışlıkla doğru sayıldı. | 01, sinav_03, 12 |
+| ~~E1~~ | ~~Bit işlemleri~~ | ~~Bit sıfırlamada `~` unutuluyor: doğrusu `x &= ~(1 << n)`. `sinav_03` 1.2'de yanlışlıkla doğru sayıldı.~~ *(Kapatıldı: 2026-11-25)* | ~~01, sinav_03, 12~~ |
 | E2 | Timer | PSC/ARR 16 bitlik yazmaçlar (en çok 65535). "PSC = 72000" donanımda mümkün değil. Örnek ayar: PSC = 7199, ARR = 4999 → 500 ms. | 11, sinav_02 |
 | E3 | Interrupt | `volatile` ≠ atomik. Oku-değiştir-yaz yarışı (race condition) ve kritik bölge (`__disable_irq`) hiç işlenmedi. "Önbellek" ile "yazmaç" karışıyor. | 10 |
 | E4 | Zamanlama | `millis`/`HAL_GetTick` taşması: neden `simdi - son >= T` doğru, `simdi >= son + T` neden yanlış? | 11 |
 | E5 | I2C | Aynı modelden sensörlerde adres çakışması (çözüm: çoklayıcı veya ikinci I2C hattı), hat kapasitansı ve pull-up direnci seçimi. | 08 |
-| E6 | C | `~` ve integer promotion: `~(uint8_t)x` ifadesinin türü `int`. | 01, 02 |
+| ~~E6~~ | ~~C~~ | ~~`~` ve integer promotion: `~(uint8_t)x` ifadesinin türü `int`.~~ *(Kapatıldı: 2026-11-25)* | ~~01, 02~~ |
 | E7 | PWM | Yazmaç değerleriyle duty = `CCR / (ARR + 1)`. | 11 |
 
 Bir eksik kapatıldığında tablodaki satır ~~üstü çizilir~~ ve kapatıldığı tarih yazılır.

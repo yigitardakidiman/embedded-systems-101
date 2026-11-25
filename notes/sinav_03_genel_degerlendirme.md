@@ -45,6 +45,7 @@ flowchart TD
 - **Öğrenci İlk Yanıtı:**
   1. `1001 0110`, 1 2 4 7. bitler high. *(Doğru)*
   2. Bit 0 için `1 << 0` ile VEYA (`|`), Bit 7 için `1 << 7` ile VE (`&`) işlemine sokulmalı. *(Doğru)*
+     > **Düzeltme (Tekrar Oturumu - 2026-11-25):** Bit 7'yi sıfırlamak (Clear) için doğrudan `1 << 7` ile VE (`&`) yapmak diğer tüm bitleri sıfırlar (`DRONE_STATUS &= (1 << 7)` sadece Bit 7'yi korur). Doğrusu maskenin tersiyle (`~`) VE işlemine sokmaktır: `DRONE_STATUS &= ~(1 << 7);`. Bu eksik Tekrar Oturumu 1'de giderildi.
   3. *"Ya da kullanmalıyız çünkü ikisi de 1 olduğunda ya da kapısı 0 yapar ve active low'u çalıştırır."*
 - **Hata Analizi ve Pedagojik Rehberlik:**
   - VEYA (OR) kapısı $1 \text{ OR } 1 = \mathbf{1}$ üretir, $0$ üretmez.
