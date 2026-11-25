@@ -262,6 +262,52 @@ uint16_t kurtarilan_sayi = ((uint16_t)msb << 8) | lsb; // Sonuç: 300
 
 ---
 
+## 1.9 Kritik Gömülü C Tuzakları (Tekrar Oturumu Eklemeleri — E1 & E6)
+
+### 1. Bit Sıfırlamada `~` Unutma Tuzağı (E1)
+Bir yazmaçtaki yalnızca $n$. biti sıfırlamak (`0` yapmak) ve diğer 7 biti olduğu gibi korumak için maskenin mutlaka **`~` (NOT)** ile terslenmesi gerekir:
+
+- **Doğru Kullanım (`&= ~`):**
+  ```c
+  PORTB &= ~(1 << 4); // Maske: 1110 1111 -> Sadece Bit 4 sıfırlanır, diğer bitler korunur.
+  ```
+- **Hatalı Kullanım (`~` unutulursa):**
+  ```c
+  PORTB &= (1 << 4);  // Maske: 0001 0000 -> Bit 4 dışındaki TÜM BİTLER sıfırlanır!
+  ```
+  `~` unutulduğunda maske yalnızca 4. bitte `1`, diğer tüm bitlerde `0` içerir. VE (`&`) işlemi `0` gördüğü her yeri sıfırladığı için diğer tüm çıkışlar/LED'ler yanlışlıkla söner.
+
+---
+
+### 2. `~` Operatörü ve Tamsayı Yükseltme (*Integer Promotion*) Tuzağı (E6)
+C dilinde `uint8_t` veya `uint16_t` gibi `int` türünden daha dar değişkenler, `~` (bitwise NOT) gibi bit işlemine girmeden önce otomatik olarak **`int` (32 bitlik sistemde 32 bit)** türüne genişletilir (*integer promotion*).
+
+```c
+uint8_t x = 0x0F; // 8 bitte: 0000 1111
+
+if (~x == 0xF0) { // YANLIŞ! Bu koşul ASLA sağlanmaz (false döner)
+    LED_ON();
+}
+```
+
+**Neden `false` döner?**
+1. `x` (`0x0F`), `~` işleminden önce 32 bitlik `int` türüne yükseltilir: `0x0000000F`
+2. `~x` işlemi **32 bitin tamamını** tersler: `0xFFFFFFF0`
+3. Sağ taraftaki `0xF0` ise `0x000000F0` değerindedir.
+4. `0xFFFFFFF0 == 0x000000F0` karşılaştırması üst 24 bitteki `FFFFFF` yüzünden **eşitsiz** çıkar.
+
+**Doğru Çözüm (Üst 24 Biti Temizleyen İki Yöntem):**
+1. **Tür Dönüşümü (Type Cast — Makasla Kesme):**
+   ```c
+   if ((uint8_t)~x == 0xF0) // Üst 24 bit kesilip atılır, geriye 0xF0 kalır.
+   ```
+2. **Bit Maskeleme (`& 0xFF` — Elekten Geçirme):**
+   ```c
+   if ((~x & 0xFF) == 0xF0) // Üst 24 bit 0 ile VE'lenerek sıfırlanır, alt 8 bit korunur.
+   ```
+
+---
+
 ## 🎯 1. Bölüm Genel Değerlendirme (Donanım Senaryosu)
 
 **Senaryo:** Mikrodenetleyicinin `PORTB` yazmacının mevcut değeri `0x5C` olarak okunmuştur.
